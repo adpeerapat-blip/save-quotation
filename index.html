@@ -1,0 +1,2771 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบใบเสนอราคาอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Signature Pad CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <!-- jsPDF and html2canvas for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #2563eb;
+            --secondary-blue: #60a5fa;
+            --dark-blue: #1e3a8a;
+            --nav-bg: #0891b2; /* สีฟ้าเขียว */
+            --nav-active: #0e7490; /* สีฟ้าเขียวเข้มสำหรับปุ่มที่ถูกเลือก */
+            --nav-indicator: #67e8f9; /* สีขอบแถบเมนูด้านซ้าย */
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f97316;
+            --yellow: #ca8a04;
+            --gray-bg: #f3f4f6;
+            --gray-text: #6b7280;
+            --dark-text: #1f2937;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --input-border: #d1d5db;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--gray-bg);
+            color: var(--dark-text);
+            font-size: 16px;
+            padding-left: 260px; /* เว้นที่ว่างด้านซ้ายให้เมนู Sidebar สำหรับจอ Desktop */
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* --- Navbar (Sidebar Layout) --- */
+        .navbar {
+            background-color: var(--nav-bg);
+            color: white;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .navbar-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            width: 100%;
+        }
+        #navbar-logo {
+            max-height: 60px;
+            border-radius: 8px;
+            background-color: #fff;
+            padding: 5px;
+            width: auto;
+            max-width: 90%;
+        }
+
+        .navbar-menu {
+            display: flex;
+            flex-direction: column;
+            list-style: none;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 12px 16px; 
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px; 
+            font-size: 1rem; 
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background-color: var(--nav-active);
+            box-shadow: 4px 0 0 var(--nav-indicator) inset;
+        }
+        
+        .nav-link i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-link .pending-badge {
+            background-color: var(--red);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .navbar-toggle { 
+            display: none; 
+        }
+
+        /* --- UI Components --- */
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+        }
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-blue);
+            padding-bottom: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background-color: var(--primary-blue); color: white; }
+        .btn-primary:hover {
+            background-color: var(--primary-blue-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-approve { background-color: var(--green); color: white; }
+        .btn-reject { background-color: var(--red); color: white; }
+        .btn-return { background-color: var(--orange); color: white; }
+        .btn-secondary { background-color: var(--gray-text); color: white; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input, .form-group textarea {
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f9fafb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .table-wrapper { 
+            width: 100%; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
+        }
+        .custom-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .custom-table th, .custom-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--input-border);
+        }
+        .custom-table thead th {
+            background-color: #eef2ff;
+            font-weight: 700;
+            color: var(--dark-blue);
+            white-space: nowrap; 
+        }
+        .custom-table tbody tr:hover { background-color: var(--gray-bg); }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .status-pending { background-color: #ffedd5; color: var(--orange); }
+        .status-approved { background-color: #dcfce7; color: var(--green); }
+        .status-rejected { background-color: #fee2e2; color: var(--red); }
+        .status-returned { background-color: #fef9c3; color: var(--yellow); }
+        
+        /* --- Home Page Specifics --- */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        .summary-card { padding: 15px; display: flex; flex-direction: column; border-left: 4px solid; }
+        .summary-card.pending { border-color: var(--orange); }
+        .summary-card.returned { border-color: var(--yellow); }
+        .summary-card.approved { border-color: var(--green); }
+        .summary-card.rejected { border-color: var(--red); }
+        .summary-card .count { font-size: 1.8rem; font-weight: 700; line-height: 1; margin-bottom: 5px; }
+        .summary-card .title { font-size: 0.95rem; color: var(--gray-text); }
+        .summary-card .icon { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .summary-card.pending .icon { color: var(--orange); }
+        .summary-card.returned .icon { color: var(--yellow); }
+        .summary-card.approved .icon { color: var(--green); }
+        .summary-card.rejected .icon { color: var(--red); }
+
+        /* --- Pagination Styles --- */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap; 
+            gap: 6px; 
+        }
+        .pagination button {
+            background-color: white;
+            border: 1px solid var(--input-border);
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.2s, color 0.2s;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.95rem;
+        }
+        .pagination button:disabled { cursor: not-allowed; opacity: 0.5; }
+        .pagination button:not(:disabled):hover { background-color: var(--gray-bg); }
+        .pagination button.active {
+            background-color: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+            font-weight: bold;
+        }
+        .pagination span.dots { padding: 8px 4px; color: var(--gray-text); }
+        
+        /* --- Create/Signature Specifics --- */
+        #item-table-body input {
+            width: 100%; border: none; background: transparent; padding: 8px 4px; font-size: 1rem;
+            min-width: 80px; 
+        }
+        #item-table-body input[name="itemName"] { min-width: 180px; }
+        #item-table-body td { padding-top: 4px; padding-bottom: 4px; }
+
+        .signature-pad-container { border: 2px dashed var(--input-border); border-radius: 8px; position: relative; background: white;}
+        #signature-pad { width: 100%; height: 200px; cursor: crosshair; touch-action: none; }
+        #clear-signature { position: absolute; top: 10px; right: 10px; z-index: 10; }
+        
+        .signature-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+        .signature-tabs .btn { flex-grow: 1; }
+        .signature-tabs .btn.active { background-color: var(--primary-blue); color: white; }
+        .signature-tabs .btn:not(.active) { background-color: #e5e7eb; color: var(--dark-text); }
+        .swal2-popup .signature-tabs .btn.active { background-color: var(--primary-blue); color: white; }
+        .swal2-popup .signature-tabs .btn:not(.active) { background-color: #e5e7eb; color: var(--dark-text); }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-blue); border-radius: 50%;
+            width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; margin-left: 10px; vertical-align: middle;
+        }
+
+        /* --- Approval Page Specifics --- */
+        .approval-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .approval-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .approval-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .approval-card-header { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--input-border); }
+        .approval-card-content { display: grid; grid-template-columns: auto 1fr; gap: 10px; font-size: 0.9rem; }
+        .approval-card-content span { font-weight: 500; }
+        .approval-card-content label { font-weight: 700; }
+
+        /* --- Modal for Details & Approval --- */
+        .modal {
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s;
+            overflow: hidden; 
+        }
+        .modal-content {
+            background-color: var(--gray-bg); margin: 2vh auto; padding: 0;
+            border: 1px solid #888; width: 90vw; max-width: 900px; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+            max-height: 96vh;
+        }
+        .modal-header {
+            padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #eee; background-color: white;
+            border-top-left-radius: 12px; border-top-right-radius: 12px; flex-shrink: 0;
+        }
+        .modal-body-container { 
+            padding: 15px; 
+            overflow: auto; 
+            -webkit-overflow-scrolling: touch; 
+            flex-grow: 1;
+            background: #e5e7eb;
+        }
+        .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-footer {
+            padding: 15px 25px; border-top: 1px solid var(--input-border); display: flex;
+            justify-content: flex-end; flex-wrap: wrap; gap: 10px; background-color: white;
+            border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; flex-shrink: 0;
+        }
+
+        /* --- แก้ปัญหา Popup ของ SweetAlert2 ซ่อนด้านหลัง Modal --- */
+        .swal2-container {
+            z-index: 10005 !important;
+        }
+        
+        /* --- A4 Preview Styles (Modal) --- */
+        .a4-preview-modal {
+            background: white; width: 210mm; padding: 15mm; margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            max-width: none; 
+        }
+        .a4-preview-modal .company-info { text-align: left; font-size: 8px; line-height: 1.5; }
+        .a4-preview-modal .logo-container img { max-height: 45px; }
+        .a4-preview-modal h2 { font-size: 20px; margin: 0; }
+        .a4-preview-modal .header-details p { margin:0; }
+        .a4-preview-modal .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; font-size: 10px; }
+        .a4-preview-modal .info-box { border: 1px solid #eee; padding: 1rem; border-radius: 5px; }
+        .a4-preview-modal .intro-text { text-align: center; margin-bottom: 1.5rem; }
+        .a4-preview-modal .intro-text p { margin: 0; font-size: 8px; }
+        .a4-preview-modal .items-table { width:100%; font-size: 9px !important; }
+        .a4-preview-modal .footer-section { margin-top: auto; padding-top: 1.5rem; }
+        .a4-preview-modal .totals-grid { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 2rem; page-break-inside: avoid; }
+        .a4-preview-modal .remarks-box { width: 50%; font-size: 10px; text-align: left; }
+        .a4-preview-modal .remarks-content { padding: 10px; border: 1px solid #eee; border-radius: 5px; min-height: 150px; white-space: pre-wrap; }
+        .a4-preview-modal .summary-box { width: 45%; text-align: right; font-size: 12px; line-height: 1.8; }
+        .a4-preview-modal .summary-row { display: flex; justify-content: space-between; }
+        .a4-preview-modal .summary-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; }
+        .a4-preview-modal .signatures-grid { display: flex; justify-content: space-between; text-align:center; page-break-inside: avoid; font-size: 12px !important; margin-top: 2rem; }
+        .a4-preview-modal .signature-box { width: 30%; position: relative; min-height: 90px; }
+        .a4-preview-modal .signature-box img { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); height: 50px; }
+        .a4-preview-modal .signature-box .signature-lines { position: absolute; bottom: 0; left: 0; right: 0; }
+        .a4-preview-modal .signature-box p { margin: 0; }
+        .a4-preview-modal .signature-box p.line { margin-bottom: 2px; }
+        
+        #pdf-render-container {
+            position: absolute; left: -9999px; top: 0; z-index: -100;
+            width: 210mm; background: white; padding: 15mm; font-size: 12px; color: #333; line-height: 1.6;
+        }
+
+        .search-bar { margin-bottom: 1.5rem; }
+        .search-bar input { width: 100%; max-width: 400px; padding: 12px; border-radius: 8px; border: 1px solid var(--input-border); font-size: 1rem; }
+        #logo-preview { max-width: 200px; max-height: 100px; margin-top: 1rem; border: 1px solid #ccc; padding: 5px; }
+
+        /* =========================================
+           RESPONSIVE BREAKPOINTS
+           ========================================= */
+
+        /* สำหรับหน้าจอ Tablet แนวตั้งไปจนถึง iPad แนวนอน (1024px) */
+        @media (max-width: 1024px) {
+            body { 
+                padding-left: 0; 
+            }
+            .container { 
+                margin: 1.5rem auto; 
+                padding: 0 1.5rem; 
+            }
+            
+            /* เปลี่ยน Sidebar ให้เป็น Top Navbar แทน */
+            .navbar { 
+                padding: 0 1.5rem; 
+                flex-direction: row; 
+                width: 100%; 
+                height: 70px; 
+                position: sticky; 
+                top: 0;
+                overflow-y: visible;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+            .navbar-brand { 
+                flex-direction: row; 
+                margin-bottom: 0; 
+                width: auto;
+                justify-content: flex-start;
+            }
+            .navbar-brand span { display: inline-block; font-size: 1.15rem; }
+            #navbar-logo { max-height: 40px; }
+            
+            .navbar-toggle { display: block; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+            
+            /* ซ่อนเมนู และให้แสดงเมื่อกด Toggle */
+            .navbar-menu {
+                display: none; position: absolute; top: 70px; left: 0; width: 100%;
+                background-color: var(--nav-bg); flex-direction: column; padding: 0.5rem 0;
+                z-index: 999; box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            }
+            .navbar-menu.active { display: flex; }
+            .nav-link { 
+                justify-content: flex-start; 
+                padding: 14px 2rem; 
+                border-radius: 0; 
+                margin: 0;
+                font-size: 1.05rem;
+            }
+            .nav-link:hover { transform: translateX(10px); }
+            .nav-link.active { box-shadow: 4px 0 0 var(--nav-indicator) inset; }
+            
+            .summary-cards { grid-template-columns: repeat(2, 1fr); }
+            .modal-content { width: 90vw; margin: 3vh auto; }
+        }
+
+        /* สำหรับหน้าจอมือถือขนาดทั่วไป (768px ลงไป) */
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            .container { padding: 0 1rem; margin: 1rem auto; }
+            .navbar { padding: 0 1rem; height: 60px; }
+            .navbar-brand span { display: none; }
+            .navbar-menu { top: 60px; }
+            
+            .summary-cards, .approval-grid, .form-grid { grid-template-columns: 1fr; }
+            
+            .card { padding: 16px; margin-bottom: 1rem; }
+            .section-header { font-size: 1.3rem; margin-bottom: 1rem; }
+            
+            .modal-content { width: 95vw; margin: 2vh auto; max-height: 96vh;}
+            .modal-footer { flex-direction: column; align-items: stretch; }
+            .modal-footer button { width: 100%; margin: 0; }
+        }
+
+        /* สำหรับหน้าจอมือถือเล็กมาก (480px ลงไป) */
+        @media (max-width: 480px) {
+            .summary-card { padding: 12px; }
+            .summary-card .count { font-size: 1.5rem; }
+            .summary-card .icon { font-size: 1.1rem; margin-bottom: 0.25rem; }
+            .signature-tabs { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <img id="navbar-logo" src="https://placehold.co/150x50/1e3a8a/ffffff?text=Logo" alt="Company Logo" >
+            <span>ระบบใบเสนอราคา</span>
+        </div>
+        <button class="navbar-toggle" id="navbar-toggle" aria-label="Toggle navigation"><i class="fa-solid fa-bars"></i></button>
+        <ul class="navbar-menu" id="navbar-menu">
+            <li><a href="#home" class="nav-link"><i class="fa-solid fa-house"></i> หน้าแรก</a></li>
+            <li><a href="#create" class="nav-link"><i class="fa-solid fa-file-circle-plus"></i> สร้างใบเสนอราคา</a></li>
+            <li><a href="#edit" class="nav-link"><i class="fa-solid fa-pen-to-square"></i> แก้ไขใบเสนอราคา <span id="returned-count-badge" class="pending-badge" style="display: none;">0</span></a></li>
+            <li><a href="#approve" class="nav-link"><i class="fa-solid fa-file-signature"></i> อนุมัติใบเสนอราคา <span id="pending-count-badge" class="pending-badge" style="display: none;">0</span></a></li>
+            <li><a href="#documents" class="nav-link"><i class="fa-solid fa-download"></i> โหลดเอกสาร</a></li>
+            <li><a href="#settings" class="nav-link"><i class="fa-solid fa-cog"></i> ตั้งค่า</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Page: Home -->
+        <section id="home" class="page">
+            <div class="summary-cards" id="summary-cards">
+                <div class="card summary-card pending">
+                    <i class="fa-solid fa-clock icon"></i>
+                    <div id="pending-count" class="count">0</div>
+                    <div class="title">รออนุมัติ</div>
+                </div>
+                <div class="card summary-card returned">
+                    <i class="fa-solid fa-arrow-rotate-left icon"></i>
+                    <div id="returned-count-home" class="count">0</div>
+                    <div class="title">รอแก้ไข</div>
+                </div>
+                <div class="card summary-card approved">
+                    <i class="fa-solid fa-circle-check icon"></i>
+                    <div id="approved-count" class="count">0</div>
+                    <div class="title">อนุมัติแล้ว</div>
+                </div>
+                 <div class="card summary-card rejected">
+                    <i class="fa-solid fa-circle-xmark icon"></i>
+                    <div id="rejected-count" class="count">0</div>
+                    <div class="title">ไม่อนุมัติ</div>
+                </div>
+            </div>
+            <div class="card">
+                <h2 class="section-header">เอกสารล่าสุด</h2>
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>วันที่แจ้ง</th>
+                                <th>เลขที่เอกสาร</th>
+                                <th>ชื่อผู้ติดต่อ</th>
+                                <th>ชื่อบริษัท</th>
+                                <th>ผู้ขอ</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="latest-docs-table">
+                            <!-- Data will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="pagination" class="pagination"></div>
+            </div>
+        </section>
+
+        <!-- Page: Create Quotation -->
+        <section id="create" class="page">
+             <form id="quotation-form">
+                <div class="card">
+                    <h2 class="section-header">ข้อมูลลูกค้า</h2>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="contact-name">ชื่อผู้ติดต่อ (ชื่อ-สกุล)</label><input type="text" id="contact-name" name="contactName" required></div>
+                        <div class="form-group"><label for="contact-phone">เบอร์โทร</label><input type="tel" id="contact-phone" name="contactPhone" pattern="[0-9]{10}" title="กรุณากรอกเบอร์โทรศัพท์ 10 หลัก" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required></div>
+                        <div class="form-group"><label for="company-name">ชื่อบริษัท</label><input type="text" id="company-name" name="companyName" required></div>
+                        <div class="form-group"><label for="address">ที่อยู่</label><textarea id="address" name="address" rows="3" required></textarea></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-header">ข้อมูลการเสนอราคาและเงื่อนไข</h2>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="delivery-date">วันกำหนดส่ง</label><input type="date" id="delivery-date" name="deliveryDate" required></div>
+                        <div class="form-group"><label for="expiry-days">ยื่นราคาภายใน (วัน)</label><input type="number" id="expiry-days" value="30" min="1" required></div>
+                        <div class="form-group"><label for="expiry-date">Expire Date</label><input type="date" id="expiry-date" name="expiryDate" readonly></div>
+                        <div class="form-group"><label for="credit-days">จำนวนวันเครดิต</label><input type="number" id="credit-days" name="creditDays" min="0" required></div>
+                        <div class="form-group"><label for="machine-model">รุ่นเครื่อง</label><input type="text" id="machine-model" name="machineModel" required></div>
+                        <div class="form-group"><label for="technician">ช่างผู้รับผิดชอบ</label><input type="text" id="technician" name="technician" required></div>
+                        <div class="form-group"><label for="proposer-phone">เบอร์โทรผู้เสนอราคา</label><input type="tel" id="proposer-phone" name="proposerPhone" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-header">รายการสินค้า</h2>
+                    <div class="table-wrapper">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>รหัสสินค้า</th>
+                                    <th>ชื่อสินค้า</th>
+                                    <th style="width: 10%;">จำนวน</th>
+                                    <th style="width: 15%;">ราคา/หน่วย</th>
+                                    <th style="width: 10%;">ส่วนลด %</th>
+                                    <th style="width: 15%;">ราคาสุทธิ</th>
+                                    <th style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="item-table-body">
+                                <!-- Item rows will be added here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" id="add-item-btn" class="btn btn-primary" style="margin-top: 1rem;"><i class="fa-solid fa-plus"></i> เพิ่มรายการ</button>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-header">หมายเหตุ</h2>
+                    <div class="form-group">
+                        <textarea id="remarks" name="remarks" rows="4" placeholder="เพิ่มเงื่อนไขการชำระเงิน, กำหนดยืนราคา หรือหมายเหตุอื่นๆ..."></textarea>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-header">สรุปยอด</h2>
+                    <div style="max-width: 400px; margin-left: auto; text-align: right; font-size: 1.1rem;">
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>ราคารวม (บาท)</span><span id="subtotal">0.00 บาท</span></div>
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>ส่วนลด (บาท)</span><span id="total-discount">0.00 บาท</span></div>
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>ราคา(หลังหักส่วนลด)</span><span id="net-total">0.00 บาท</span></div>
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>ภาษีมูลค่าเพิ่ม 7%:</span><span id="vat">0.00 บาท</span></div>
+                        <hr style="margin: 10px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0; font-weight: 700; font-size: 1.25rem;"><span>ราคารวมทั้งสิ้น (บาท)</span><span id="grand-total">0.00 บาท</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-header">การอนุมัติ</h2>
+                    <div class="form-grid">
+                         <div class="form-group">
+                            <label for="approver-name">ผู้ขออนุมัติ (ชื่อ-สกุล)</label>
+                            <input type="text" id="approver-name" name="approverName" placeholder="พิมพ์ชื่อเพื่อค้นหาลายเซ็นเดิม..." required>
+                        </div>
+                         <div class="form-group">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <label style="margin: 0;">รูปแบบลายเซ็น</label>
+                                <span id="signature-loading-spinner" class="loading-spinner" style="display: none;"></span> 
+                            </div>
+
+                            <div class="signature-tabs">
+                                <button type="button" id="use-saved-sig-btn" class="btn btn-secondary" style="display: none;">ใช้ลายเซ็นเดิม</button>
+                                <button type="button" id="draw-sig-btn" class="btn btn-secondary active">วาดลายเซ็น</button>
+                                <button type="button" id="upload-sig-btn" class="btn btn-secondary">อัพโหลดไฟล์</button>
+                            </div>
+
+                            <!-- ส่วนแสดงลายเซ็นเดิมจากระบบ -->
+                            <div id="saved-signature-container" style="display: none; border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; background: #f9fafb;">
+                                <label style="font-weight: normal; color: var(--green); display: block; margin-bottom: 10px;"><i class="fa-solid fa-circle-check"></i> พบลายเซ็นเดิมของคุณในระบบ</label>
+                                <img id="current-signature-image" src="" alt="Saved Signature" style="max-height: 100px; border-radius: 4px;" >
+                            </div>
+
+                            <!-- ส่วนวาดลายเซ็น -->
+                            <div class="signature-pad-container" id="signature-pad-container">
+                                <canvas id="signature-pad"></canvas>
+                                <button type="button" id="clear-signature" class="btn btn-secondary"><i class="fa-solid fa-eraser"></i> ล้าง</button>
+                            </div>
+
+                            <!-- ส่วนอัปโหลดลายเซ็น -->
+                            <div class="signature-upload-container" id="signature-upload-container" style="display: none;">
+                                <input type="file" id="signature-upload-input" accept="image/png, image/jpeg" style="display: none;">
+                                <div id="signature-preview-container" style="border: 2px dashed var(--input-border); border-radius: 8px; padding: 10px; min-height: 204px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; background: white;">
+                                     <span id="upload-placeholder-text" style="color: var(--gray-text);"><i class="fa-solid fa-cloud-arrow-up" style="font-size: 2rem; margin-bottom: 10px; display:block;"></i>คลิกเพื่ออัปโหลดไฟล์ภาพ</span>
+                                     <img id="signature-preview-image" style="display: none; max-width: 100%; max-height: 180px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button type="submit" id="submit-quotation-btn" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.2rem;"><i class="fa-solid fa-paper-plane"></i> ขออนุมัติ</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Page: Edit Quotation -->
+        <section id="edit" class="page">
+            <div class="card">
+                <div class="search-bar">
+                    <input type="text" id="edit-search-input" placeholder="🔍 ค้นหาจากเลขที่เอกสาร หรือ ผู้ขออนุมัติ...">
+                </div>
+            </div>
+            <div class="card">
+                 <h2 class="section-header">รายการตีกลับ (ต้องแก้ไข)</h2>
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>วันที่</th>
+                                <th>เลขที่เอกสาร</th>
+                                <th>ผู้ขออนุมัติ</th>
+                                <th>สถานะ</th>
+                                <th>หมายเหตุการตีกลับ</th>
+                                <th>ดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="edit-returned-table-body">
+                            <!-- Returned for edit list will be here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+             <div class="card">
+                 <h2 class="section-header">รายการรออนุมัติ</h2>
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>วันที่</th>
+                                <th>เลขที่เอกสาร</th>
+                                <th>ผู้ขออนุมัติ</th>
+                                <th>สถานะ</th>
+                                <th>ดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="edit-pending-table-body">
+                            <!-- Pending list for edit will be here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page: Approve Quotation -->
+        <section id="approve" class="page">
+             <div id="approve-login" class="card" style="text-align: center;">
+                <h2 class="section-header">กรุณาเข้าสู่ระบบเพื่อดำเนินการ</h2>
+                <p style="margin-bottom: 1rem;">เฉพาะผู้มีสิทธิ์อนุมัติเท่านั้น</p>
+                <button id="login-google-btn" class="btn btn-primary"><i class="fa-brands fa-google"></i> กดเพื่อเข้าสู่ระบบ</button>
+            </div>
+
+            <div id="approve-content" style="display: none;">
+                <div class="card">
+                    <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <h2 class="section-header" style="margin-bottom: 0;">รายการรออนุมัติ</h2>
+                        <span id="user-email-display" style="color: var(--primary-blue-dark); font-weight: 500;"></span>
+                    </div>
+                    <div id="approval-grid" class="approval-grid" style="margin-top: 1.5rem;">
+                        <!-- Approval cards will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page: Documents -->
+        <section id="documents" class="page">
+            <div class="card">
+                 <h2 class="section-header">คลังเอกสาร</h2>
+                <div class="search-bar">
+                    <input type="text" id="doc-search-input" placeholder="🔍 ค้นหาจากเลขที่เอกสาร, ผู้ขออนุมัติ, ผู้ติดต่อ หรือ บริษัท...">
+                </div>
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>วันที่</th>
+                                <th>เลขที่เอกสาร</th>
+                                <th>ผู้ขออนุมัติ</th>
+                                <th>ชื่อผู้ติดต่อ</th>
+                                <th>ชื่อบริษัท</th>
+                                <th>สถานะ</th>
+                                <th>ดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documents-table-body">
+                            <!-- Document list will be here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page: Settings -->
+        <section id="settings" class="page">
+            <div class="card">
+                <h2 class="section-header">ตั้งค่าระบบ</h2>
+                <div class="form-group">
+                    <label for="logo-upload">อัปโหลดโลโก้บริษัท</label>
+                    <input type="file" id="logo-upload" accept="image/png, image/jpeg">
+                    <img id="logo-preview" src="https://placehold.co/200x100/f3f4f6/6b7280?text=Preview" alt="Logo Preview">
+                    <button id="save-logo-btn" class="btn btn-primary" style="margin-top: 1rem; width: fit-content;">บันทึกโลโก้</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Approval Details -->
+    <div id="approval-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">รายละเอียดใบเสนอราคา</h3>
+                <span class="close-btn" id="close-modal-btn">&times;</span>
+            </div>
+            <div class="modal-body-container">
+                 <div id="approval-preview-container">
+                    <!-- A4 Template will be rendered here by JS -->
+                </div>
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <button id="return-btn" class="btn btn-return"><i class="fa-solid fa-rotate-left"></i> ตีกลับแก้ไข</button>
+                <button id="reject-btn" class="btn btn-reject"><i class="fa-solid fa-times-circle"></i> ไม่อนุมัติ</button>
+                <button id="approve-btn" class="btn btn-approve"><i class="fa-solid fa-check-circle"></i> อนุมัติ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Document Preview -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>พรีวิวเอกสาร</h3>
+                 <span class="close-btn" id="close-preview-modal-btn">&times;</span>
+            </div>
+             <div class="modal-body-container">
+                <div id="preview-template-container">
+                    <!-- A4 Template will be rendered here by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="download-pdf-btn" class="btn btn-primary"><i class="fa-solid fa-file-pdf"></i> ดาวน์โหลด PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Container for PDF Rendering -->
+    <div id="pdf-render-container">
+    </div>
+
+
+    <script>
+        // --- Config ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbwWo71tG1zgV35yxRTOFLHkX3DmbgDw7wnyaZ93cvU6jIzO4l_jWgAcWhXA9CkqIOc9/exec";
+        
+        window.onload = () => {
+            // --- DOM Elements & Global Variables ---
+            const pages = document.querySelectorAll('.page');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const navbarLogo = document.getElementById('navbar-logo');
+            const navbarToggle = document.getElementById('navbar-toggle');
+            const navbarMenu = document.getElementById('navbar-menu');
+            const approveLoginSection = document.getElementById('approve-login');
+            const approveContentSection = document.getElementById('approve-content');
+            const loginGoogleBtn = document.getElementById('login-google-btn');
+            const userEmailDisplay = document.getElementById('user-email-display');
+            const approvalGrid = document.getElementById('approval-grid');
+            const approvalModal = document.getElementById('approval-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const pendingBadge = document.getElementById('pending-count-badge');
+            const returnedBadge = document.getElementById('returned-count-badge');
+            const searchInput = document.getElementById('doc-search-input');
+            const documentsTableBody = document.getElementById('documents-table-body');
+            const previewModal = document.getElementById('preview-modal');
+            const closePreviewModalBtn = document.getElementById('close-preview-modal-btn');
+            const downloadPdfBtn = document.getElementById('download-pdf-btn');
+            const logoUpload = document.getElementById('logo-upload');
+            const logoPreview = document.getElementById('logo-preview');
+            const saveLogoBtn = document.getElementById('save-logo-btn');
+            const itemTableBody = document.getElementById('item-table-body');
+            const addItemBtn = document.getElementById('add-item-btn');
+            const quotationForm = document.getElementById('quotation-form');
+            const approverNameInput = document.getElementById('approver-name');
+
+            // Signature Elements
+            const useSavedSigBtn = document.getElementById('use-saved-sig-btn');
+            const drawSigBtn = document.getElementById('draw-sig-btn');
+            const uploadSigBtn = document.getElementById('upload-sig-btn');
+            const savedSignatureContainer = document.getElementById('saved-signature-container');
+            const signaturePadContainer = document.getElementById('signature-pad-container');
+            const signatureUploadContainer = document.getElementById('signature-upload-container');
+            const signatureUploadInput = document.getElementById('signature-upload-input');
+            const signaturePreviewContainer = document.getElementById('signature-preview-container');
+            const signaturePreviewImage = document.getElementById('signature-preview-image');
+            const uploadPlaceholderText = document.getElementById('upload-placeholder-text');
+            
+            // Edit Page Elements
+            const editSearchInput = document.getElementById('edit-search-input');
+            const editReturnedTableBody = document.getElementById('edit-returned-table-body');
+            const editPendingTableBody = document.getElementById('edit-pending-table-body');
+
+            // --- Lazy Initialized Variables ---
+            let signaturePad; 
+            
+            // --- State Variables ---
+            let allDocuments = [];
+            let allDocumentsForEdit = [];
+            let currentPage = 1;
+            const rowsPerPage = 10;
+            let pendingQuotationsData = [];
+            let processedDocuments = [];
+            let logoBase64 = '';
+            let processedSignatureBase64 = '';
+            let signatureMode = 'draw'; // 'draw', 'upload', or 'saved'
+            let editingDocNumber = null;
+            let currentEditDocDate = null; // เพิ่มตัวแปรสำหรับเก็บวันที่ของเอกสารเดิม
+            let currentSignatureUrl = ''; 
+            let currentPreviewData = null; 
+            let allUsersSignatures = {}; 
+            
+            // ตัวแปรสำหรับเก็บข้อมูลผู้อนุมัติที่โหลดจาก Sheet
+            let approverMapping = {};
+            let approverEmails = [];
+
+            // --- General Helpers ---
+            // Fix 7: เพิ่มฟังก์ชัน escapeHTML ป้องกัน XSS
+            function escapeHTML(str) {
+                if (str === null || str === undefined) return '';
+                return String(str)
+                     .replace(/&/g, "&amp;")
+                     .replace(/</g, "&lt;")
+                     .replace(/>/g, "&gt;")
+                     .replace(/"/g, "&quot;")
+                     .replace(/'/g, "&#039;");
+            }
+
+            // Fix 8: เพิ่มฟังก์ชันแปลงสถานะเป็นภาษาไทย
+            function getStatusText(status) {
+                const map = {
+                    'pending': 'รออนุมัติ',
+                    'approved': 'อนุมัติแล้ว',
+                    'rejected': 'ไม่อนุมัติ',
+                    'returned': 'รอแก้ไข'
+                };
+                return map[status] || escapeHTML(status);
+            }
+
+            function formatCurrency(num) {
+                if (typeof num !== 'number') num = parseFloat(num) || 0;
+                return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(num).replace('฿', '');
+            }
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                return new Date(dateString).toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+             function formatDateForInput(dateString) {
+                if (!dateString) return '';
+                return new Date(dateString).toISOString().split('T')[0];
+            }
+
+
+            // --- Function to process an image and make its white background transparent ---
+            function makeWhiteTransparent(base64Image) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = "Anonymous"; // Fix 2: ป้องกัน Canvas Tainted Error สำหรับภาพข้ามโดเมน
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        try {
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const data = imageData.data;
+                            for (let i = 0; i < data.length; i += 4) {
+                                const isWhite = data[i] > 220 && data[i + 1] > 220 && data[i + 2] > 220;
+                                if (isWhite) {
+                                    data[i + 3] = 0; 
+                                }
+                            }
+                            ctx.putImageData(imageData, 0, 0);
+                            resolve(canvas.toDataURL('image/png'));
+                        } catch (e) {
+                            console.error("Error processing image data:", e);
+                            reject(new Error("Could not process image. It might be from a different origin."));
+                        }
+                    };
+                    img.onerror = (e) => reject(new Error("Failed to load image."));
+                    img.src = base64Image;
+                });
+            }
+
+            async function handleSignatureUpload(event, isSwal = false) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        if (!isSwal) {
+                           Swal.fire({ title: 'กำลังประมวลผลลายเซ็น...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+                        }
+                        
+                        const transparentBase64 = await makeWhiteTransparent(e.target.result);
+
+                        if (isSwal) {
+                             window.swalGlobal.processedSignature = transparentBase64;
+                             const previewImg = document.getElementById('swal-signature-preview-image');
+                             const placeholder = document.getElementById('swal-upload-placeholder');
+                             previewImg.src = transparentBase64;
+                             previewImg.style.display = 'block';
+                             placeholder.style.display = 'none';
+                             window.swalGlobal.signatureUrl = ''; 
+                        } else {
+                            processedSignatureBase64 = transparentBase64;
+                            signaturePreviewImage.src = transparentBase64;
+                            signaturePreviewImage.style.display = 'block';
+                            uploadPlaceholderText.style.display = 'none';
+                            if (signaturePad) signaturePad.clear();
+                            currentSignatureUrl = ''; 
+                        }
+                         
+                         if (!isSwal) {
+                            Swal.close();
+                         }
+                    } catch (error) {
+                        if (!isSwal) Swal.close();
+                        Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถประมวลผลรูปภาพได้: ${error.message}`, 'error');
+                        console.error(error);
+                        event.target.value = '';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+
+
+            // --- Function to Auto-fit Content (For Modal Preview) ---
+            function adjustFontSizeToFitPage(containerId) {
+                const previewContainer = document.getElementById(containerId);
+                if (!previewContainer) return;
+                const a4Element = previewContainer.querySelector('.a4-preview-modal'); 
+                if (!a4Element) return;
+
+                requestAnimationFrame(() => {
+                    a4Element.style.fontSize = '12px'; 
+                    requestAnimationFrame(() => {
+                        const a4Height = a4Element.clientHeight;
+                        let contentHeight = a4Element.scrollHeight;
+                        let currentFontSize = 12;
+                        let attempts = 0; 
+                        
+                        if (contentHeight <= a4Height) return;
+
+                        while (contentHeight > a4Height && currentFontSize > 7 && attempts < 50) {
+                            currentFontSize -= 0.25; 
+                            a4Element.style.fontSize = `${currentFontSize}px`;
+                            contentHeight = a4Element.scrollHeight; 
+                            attempts++;
+                        }
+                    });
+                });
+            }
+
+            // --- Signature Pad & Tab Logic ---
+            function initializeSignaturePad() {
+                if (signaturePad) { 
+                    resizeCanvas();
+                    return;
+                }
+                try {
+                    if (typeof SignaturePad === 'undefined') {
+                        throw new Error("SignaturePad library is not loaded.");
+                    }
+                    const canvas = document.getElementById('signature-pad');
+                    if(canvas){
+                        signaturePad = new SignaturePad(canvas); 
+                        document.getElementById('clear-signature').addEventListener('click', () => {
+                            signaturePad.clear();
+                        });
+                        window.addEventListener("resize", resizeCanvas);
+                        resizeCanvas();
+                    } else {
+                        throw new Error("Canvas element not found");
+                    }
+                } catch(e) {
+                    console.error("Could not initialize SignaturePad:", e);
+                }
+            }
+            function resizeCanvas() {
+                if (!signaturePad) return;
+                const canvas = document.getElementById('signature-pad');
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.fromData(signaturePad.toData()); 
+            }
+
+            function switchSignatureMode(mode) {
+                signatureMode = mode;
+                
+                // Toggle Buttons
+                useSavedSigBtn.classList.toggle('active', mode === 'saved');
+                drawSigBtn.classList.toggle('active', mode === 'draw');
+                uploadSigBtn.classList.toggle('active', mode === 'upload');
+
+                // Toggle Containers
+                savedSignatureContainer.style.display = mode === 'saved' ? 'block' : 'none';
+                signaturePadContainer.style.display = mode === 'draw' ? 'block' : 'none';
+                signatureUploadContainer.style.display = mode === 'upload' ? 'block' : 'none';
+
+                if (mode === 'draw' && signaturePad) {
+                    resizeCanvas();
+                }
+            }
+            
+            // --- Badge Update Logic ---
+            function updatePendingBadge(count) {
+                if (count > 0) {
+                    pendingBadge.textContent = count;
+                    pendingBadge.style.display = 'flex';
+                } else {
+                    pendingBadge.style.display = 'none';
+                }
+            }
+            function updateReturnedBadge(count) {
+                if (count > 0) {
+                    returnedBadge.textContent = count;
+                    returnedBadge.style.display = 'flex';
+                } else {
+                    returnedBadge.style.display = 'none';
+                }
+            }
+             function updateAllBadges(docs) {
+                const pendingCount = docs.filter(d => d.status === 'pending').length;
+                const returnedCount = docs.filter(d => d.status === 'returned').length;
+                updatePendingBadge(pendingCount);
+                updateReturnedBadge(returnedCount);
+            }
+
+
+            // --- Home Page Logic ---
+            async function loadHomePageData(showLoader = true) {
+                if (showLoader) {
+                    Swal.fire({
+                        title: 'กำลังโหลดข้อมูล...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                }
+                
+                try {
+                    const response = await fetch(`${API_URL}?action=getDocuments`);
+                    const result = await response.json();
+                    if(result.success){
+                        const statusOrder = { 'pending': 1, 'returned': 2 };
+                        allDocuments = (result.data.all || []).sort((a, b) => {
+                            const aStatus = statusOrder[a.status] || 99;
+                            const bStatus = statusOrder[b.status] || 99;
+                            
+                            if (aStatus !== bStatus) {
+                                return aStatus - bStatus; 
+                            }
+                            return new Date(b.date) - new Date(a.date);
+                        });
+                        updateAllBadges(result.data.all); 
+                        
+                        // ย้ายการอัปเดต UI เข้ามาไว้ใน try เมื่อโหลดข้อมูลสำเร็จเท่านั้น
+                        const pendingCount = allDocuments.filter(d => d.status === 'pending').length;
+                        const returnedCount = allDocuments.filter(d => d.status === 'returned').length;
+                        const approvedCount = allDocuments.filter(d => d.status === 'approved').length;
+                        const rejectedCount = allDocuments.filter(d => d.status === 'rejected').length;
+
+                        document.getElementById('pending-count').textContent = pendingCount;
+                        document.getElementById('returned-count-home').textContent = returnedCount;
+                        document.getElementById('approved-count').textContent = approvedCount;
+                        document.getElementById('rejected-count').textContent = rejectedCount;
+
+                        currentPage = 1;
+                        displayTablePage(currentPage);
+                        setupPagination();
+
+                        if (showLoader) Swal.close();
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    console.error("Error fetching documents:", error);
+                    allDocuments = [];
+                    // รีเซ็ตตารางให้ว่างเปล่าถ้าเกิด Error
+                    displayTablePage(1);
+                    setupPagination();
+                    Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูลหน้าแรกได้: ${error.message}`, 'error');
+                }
+            }
+
+            function displayTablePage(page) {
+                const tableBody = document.getElementById('latest-docs-table');
+                tableBody.innerHTML = '';
+                if (!allDocuments.length) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">ไม่พบเอกสาร</td></tr>';
+                    return;
+                }
+                const start = (page - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const paginatedItems = allDocuments.slice(start, end);
+
+                paginatedItems.forEach(doc => {
+                    const row = document.createElement('tr');
+                    let statusClass = '';
+                    switch (doc.status) {
+                        case 'pending': statusClass = 'status-pending'; break;
+                        case 'approved': statusClass = 'status-approved'; break;
+                        case 'rejected': statusClass = 'status-rejected'; break;
+                        case 'returned': statusClass = 'status-returned'; break;
+                    }
+                    // Fix 7 & 8: ใส่ escapeHTML และแปลงสถานะเป็นภาษาไทย
+                    row.innerHTML = `
+                        <td>${escapeHTML(formatDate(doc.date))}</td>
+                        <td>${escapeHTML(doc.docNumber)}</td>
+                        <td>${escapeHTML(doc.contactName || '')}</td>
+                        <td>${escapeHTML(doc.companyName || '')}</td>
+                        <td>${escapeHTML(doc.requester)}</td>
+                        <td><span class="status-badge ${statusClass}">${getStatusText(doc.status)}</span></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // --- Updated Pagination Logic ---
+            function setupPagination() {
+                const paginationContainer = document.getElementById('pagination');
+                paginationContainer.innerHTML = '';
+                const pageCount = Math.ceil(allDocuments.length / rowsPerPage);
+
+                if (pageCount <= 1) return;
+
+                const createBtn = (text, pageNum, disabled = false, isCurrent = false) => {
+                    const btn = document.createElement('button');
+                    btn.innerHTML = text;
+                    btn.disabled = disabled;
+                    if (isCurrent) btn.classList.add('active');
+                    if (!disabled && pageNum !== null) {
+                        btn.addEventListener('click', () => {
+                            currentPage = pageNum;
+                            displayTablePage(currentPage);
+                            setupPagination();
+                        });
+                    }
+                    return btn;
+                };
+
+                // ปุ่มก่อนหน้า
+                paginationContainer.appendChild(createBtn('&laquo; ก่อนหน้า', currentPage - 1, currentPage === 1));
+
+                // คำนวณช่วงของหน้าที่จะแสดง
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(pageCount, currentPage + 2);
+
+                if (currentPage <= 3) {
+                    endPage = Math.min(5, pageCount);
+                }
+                if (currentPage >= pageCount - 2) {
+                    startPage = Math.max(1, pageCount - 4);
+                }
+
+                // แสดงหน้า 1 และจุดไข่ปลา
+                if (startPage > 1) {
+                    paginationContainer.appendChild(createBtn(1, 1));
+                    if (startPage > 2) {
+                        const dots = document.createElement('span');
+                        dots.className = 'dots';
+                        dots.innerHTML = '&hellip;';
+                        paginationContainer.appendChild(dots);
+                    }
+                }
+
+                // แสดงช่วงหน้าตรงกลาง
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationContainer.appendChild(createBtn(i, i, false, i === currentPage));
+                }
+
+                // แสดงหน้าสุดท้ายและจุดไข่ปลา
+                if (endPage < pageCount) {
+                    if (endPage < pageCount - 1) {
+                        const dots = document.createElement('span');
+                        dots.className = 'dots';
+                        dots.innerHTML = '&hellip;';
+                        paginationContainer.appendChild(dots);
+                    }
+                    paginationContainer.appendChild(createBtn(pageCount, pageCount));
+                }
+
+                // ปุ่มถัดไป
+                paginationContainer.appendChild(createBtn('ถัดไป &raquo;', currentPage + 1, currentPage === pageCount));
+            }
+            
+            // --- Approval Page Logic ---
+            async function loadApprovalPageData(showLoader = true) {
+                if (showLoader) {
+                    Swal.fire({
+                        title: 'กำลังโหลดรายการอนุมัติ...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                }
+                try {
+                    const response = await fetch(`${API_URL}?action=getPendingQuotationDetails`);
+                    const result = await response.json();
+                    if(!result.success) throw new Error(result.message);
+                    
+                    pendingQuotationsData = result.data || [];
+                    approvalGrid.innerHTML = ''; 
+
+                    if(pendingQuotationsData.length === 0){
+                       approvalGrid.innerHTML = '<p>ไม่มีเอกสารรอการอนุมัติ</p>';
+                    } else {
+                        pendingQuotationsData.forEach(doc => {
+                            const card = document.createElement('div');
+                            card.className = 'card approval-card';
+                            const cleanDocNumber = doc.docNumber.toString().replace(/'/g, '');
+                            card.dataset.docNumber = escapeHTML(cleanDocNumber);
+                            // Fix 7: ป้องกัน XSS ใน Approval Cards
+                            card.innerHTML = `
+                                <div class="approval-card-header">
+                                    <strong>เลขที่: ${escapeHTML(cleanDocNumber)}</strong>
+                                </div>
+                                <div class="approval-card-content">
+                                    <label>วันที่:</label> <span>${escapeHTML(formatDate(doc.date))}</span>
+                                    <label>ผู้ขอ:</label> <span>${escapeHTML(doc.requester)}</span>
+                                    <label>ราคาสุทธิ:</label> <span style="font-weight: bold; color: var(--primary-blue-dark);">${escapeHTML(doc.grandTotal)}</span>
+                                </div>
+                            `;
+                            card.addEventListener('click', () => showApprovalDetails(cleanDocNumber));
+                            approvalGrid.appendChild(card);
+                        });
+                    }
+                    if (showLoader) Swal.close();
+                } catch (error) {
+                    Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูลรออนุมัติได้: ${error.message}`, 'error');
+                }
+            }
+            
+            // --- PDF/Preview Template Generation ---
+            function generateTemplateHTML(data, options = {}) {
+                const itemsToRender = options.itemsToRender || data.items || [];
+                const showFooter = options.showFooter !== undefined ? options.showFooter : true;
+                const startIndex = options.startIndex || 0; // รับค่าเริ่มต้นของลำดับ
+
+                const logoUrl = navbarLogo.src; 
+                const logoHtml = (logoUrl && !logoUrl.includes('placehold.co')) ? `<img src="${logoUrl}">` : '';
+
+                const itemsHtml = itemsToRender.map((item, index) => {
+                    const rowNum = startIndex + index + 1; // คำนวณเลขลำดับ
+                    const code = item.code ? item.code.toString().replace(/'/g, '') : '';
+                    const name = item.name || '';
+                    const quantity = item.quantity || 0;
+                    const unitPrice = item.unitPrice || 0;
+                    const discount = item.discount || 0;
+                    const netPrice = item.netPrice || 0;
+
+                    return `
+                        <tr>
+                            <td style="text-align:center;">${rowNum}</td>
+                            <td>${code}</td>
+                            <td>${name}</td>
+                            <td style="text-align:right;">${quantity}</td>
+                            <td style="text-align:right;">${formatCurrency(unitPrice)}</td>
+                            <td style="text-align:right;">${discount}%</td>
+                            <td style="text-align:right;">${formatCurrency(netPrice)}</td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                let expiryText = `ยื่นราคาภายในวันที่: ${formatDate(data.expiryDate)}`;
+                if (data.expiryDate && data.date) {
+                    const startDate = new Date(data.date);
+                    const endDate = new Date(data.expiryDate);
+                    const diffTime = Math.abs(endDate - startDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                    if (!isNaN(diffDays) && diffDays > 0) {
+                         expiryText = `ยื่นราคาภายใน ${diffDays} วัน (ก่อนวันที่ ${formatDate(data.expiryDate)})`;
+                    }
+                }
+
+                // ส่วนคำนวณยอดรวม ใช้ data.items ทั้งหมดเสมอเพื่อให้ยอดเป๊ะ
+                const subtotal = (data.items || []).reduce((acc, item) => acc + (parseFloat(item.quantity || 0) * parseFloat(item.unitPrice || 0)), 0);
+                const netTotal = (data.items || []).reduce((acc, item) => {
+                    const netStr = item.netPrice ? item.netPrice.toString() : '0';
+                    return acc + (parseFloat(netStr.replace(/[^0-9.-]+/g, "")) || 0);
+                }, 0);
+                const totalDiscount = subtotal - netTotal;
+                const vatAmount = netTotal * 0.07;
+
+                // --- HTML Part 1 ---
+                const part1_Html = `
+                    <div class="pdf-part-1">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #333; padding-bottom: 0.1rem;">
+                            <div class="logo-container">${logoHtml}</div>
+                            <div class="company-info">
+                                <strong>บริษัท พีรพัฒน์ เทคโนโลยี จำกัด (มหาชน) สำนักงานใหญ่</strong><br>
+                                <span>Peerapat Technology Public Company Limited</span><br>
+                                406 ถนนรัชดาภิเษก แขวงสามเสนนอก เขตห้วยขวาง กรุงเทพมหานคร 10310<br>
+                                <span>406 Ratchadaphisek Rd., Samsen Nok, Huai Khwang, Bangkok 10310</span><br>
+                                <strong>เลขประจำตัวผู้เสียภาษี:</strong> 0107551000231
+                            </div>
+                        </div>
+                        
+                        <div style="position: relative; margin: 0.8rem 0; min-height: 2.5rem;">
+                            <div style="text-align: center;">
+                                <h2>ใบเสนอราคา / Quotation</h2>
+                            </div>
+                            <div class="header-details" style="position: absolute; top: 0; right: 0; text-align: right; font-size: 12px;">
+                                <p><strong>เลขที่เอกสาร:</strong> ${data.docNumber ? data.docNumber.toString().replace(/'/g, '') : ''}</p>
+                                <p><strong>วันที่:</strong> ${formatDate(data.date)}</p>
+                            </div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-box">
+                                <p><strong>ลูกค้า:</strong> ${data.companyName}</p>
+                                <p><strong>ที่อยู่:</strong> ${data.address}</p>
+                                <p><strong>ผู้ติดต่อ:</strong> ${data.contactName}</p>
+                                <p><strong>เบอร์โทร:</strong> ${data.contactPhone ? data.contactPhone.toString().replace(/'/g, '') : ''}</p>
+                            </div>
+                            <div class="info-box">
+                                 <p><strong>วันกำหนดส่ง:</strong> ${formatDate(data.deliveryDate)}</p>
+                                 <p><strong>${expiryText}</strong></p>
+                                 <p><strong>จำนวนวันเครดิต:</strong> ${data.creditDays} วัน</p>
+                                 <p><strong>รุ่นเครื่อง:</strong> ${data.machineModel}</p>
+                                 <p><strong>ช่างผู้รับผิดชอบ:</strong> ${data.technician}</p>
+                                 <p><strong>เบอร์โทรผู้เสนอราคา:</strong> ${data.proposerPhone}</p>
+                            </div>
+                        </div>
+                        <div class="intro-text">
+                            <p>บริษัท พีรพัฒน์ เทคโนโลยี จำกัด (มหาชน) ขอขอบคุณที่ท่านมอบความไว้ใจ ให้นำเสนอราคาสินค้าและบริการเพื่อพิจารณา ดังต่อไปนี้</p>
+                            <p>We appreciated for the opportunity to quote of our products and services for you valuable goods with best rate offers as details</p>
+                        </div>
+                        <table class="custom-table items-table">
+                             <thead><tr><th style="text-align:center; width: 5%;">ลำดับ</th><th>รหัส</th><th>ชื่อสินค้า</th><th style="text-align:right;">จำนวน</th><th style="text-align:right;">ราคา/หน่วย</th><th style="text-align:right;">ส่วนลด</th><th style="text-align:right;">ราคาสุทธิ</th></tr></thead>
+                             <tbody>${itemsHtml}</tbody>
+                        </table>
+                    </div>
+                `;
+
+                // --- HTML Part 2 ---
+                let part2_Html = '';
+                if (showFooter) {
+                    part2_Html = `
+                        <div class="pdf-part-2 footer-section">
+                            <div class="totals-grid">
+                                <div class="remarks-box">
+                                    <p style="font-weight: bold; margin: 0 0 5px 0;">หมายเหตุ :</p>
+                                    <div class="remarks-content">
+                                        <div style="white-space: pre-wrap;">${data.remarks || ''}</div>
+                                    </div>
+                                </div>
+                                <div class="summary-box">
+                                    <div class="summary-row">
+                                        <span>ราคารวม (บาท)</span>
+                                        <span>${formatCurrency(subtotal)}</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>ส่วนลด (บาท)</span>
+                                        <span>${formatCurrency(totalDiscount)}</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>ราคา(หลังหักส่วนลด)</span>
+                                        <span>${formatCurrency(netTotal)}</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>ภาษีมูลค่าเพิ่ม 7%:</span>
+                                        <span>${formatCurrency(vatAmount)}</span>
+                                    </div>
+                                    <hr style="margin: 4px 0; border: 0; border-top: 1px solid #ccc;">
+                                    <div class="summary-total">
+                                        <span>ราคารวมทั้งสิ้น (บาท)</span>
+                                        <span>${data.grandTotal}</span>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="signatures-grid">
+                               <div class="signature-box">
+                                    <img src="${data.signatureUrl}" style="opacity: ${data.signatureUrl ? 1 : 0};">
+                                    <div class="signature-lines">
+                                        <p class="line">.......................................</p>
+                                        <p>( ${data.requester} )</p>
+                                        <p>ผู้ขออนุมัติ</p>
+                                        <p>วันที่: ${formatDate(data.date)}</p>
+                                    </div>
+                               </div>
+                               <div class="signature-box">
+                                    <img src="${data.approverSignatureUrl || ''}" style="opacity: ${data.approverSignatureUrl ? 1 : 0};">
+                                    <div class="signature-lines">
+                                        <p class="line">.......................................</p>
+                                        <p>( ${data.approverName || '................'} )</p>
+                                        <p>ผู้อนุมัติ</p>
+                                        <p>วันที่: ${data.approvalDate ? formatDate(data.approvalDate) : '..............................'}</p>
+                                    </div>
+                               </div>
+                               <div class="signature-box">
+                                    <div class="signature-lines">
+                                         <p class="line">.......................................</p>
+                                         <p>( ................................ )</p>
+                                         <p>ลูกค้า</p>
+                                         <p>วันที่: ..............................</p>
+                                    </div>
+                               </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                return `<div class="a4-preview-modal">${part1_Html}${part2_Html}</div>`;
+            }
+
+            function showApprovalDetails(docNumber) {
+                const modalPreviewContainer = document.getElementById('approval-preview-container');
+                const data = pendingQuotationsData.find(q => q.docNumber.toString().replace(/'/g, '') === docNumber);
+
+                if (data) {
+                    currentPreviewData = data; 
+                    document.getElementById('modal-title').textContent = `รายละเอียดใบเสนอราคา: ${docNumber}`;
+                    modalPreviewContainer.innerHTML = generateTemplateHTML(data);
+                    
+                    adjustFontSizeToFitPage('approval-preview-container'); 
+
+                    document.getElementById('return-btn').onclick = () => handleReturnForEdit(docNumber);
+                    document.getElementById('approve-btn').onclick = () => handleApprove(docNumber);
+                    document.getElementById('reject-btn').onclick = () => handleReject(docNumber);
+                    approvalModal.style.display = 'block';
+
+                } else {
+                     approvalModal.style.display = 'none';
+                     Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดรายละเอียดเอกสารได้`, 'error');
+                }
+            }
+
+            function handleReturnForEdit(docNumber) {
+                Swal.fire({
+                    title: 'ยืนยันการตีกลับเพื่อแก้ไข',
+                    input: 'textarea',
+                    inputLabel: 'เหตุผล/สิ่งที่ต้องแก้ไข (จำเป็น)',
+                    inputPlaceholder: 'กรุณาระบุเหตุผล...',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'กรุณาระบุเหตุผลที่ตีกลับ!'
+                        }
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await updateStatus(docNumber, 'returned', { reason: result.value });
+                    }
+                });
+            }
+            
+            async function handleApprove(docNumber) {
+                // อัปเดตการทำความสะอาดข้อความ เพื่อไม่ให้มีปัญหาจากเรื่อง Case Sensitive และช่องว่าง
+                const rawUserEmail = sessionStorage.getItem('approverEmail') || '';
+                const userEmail = rawUserEmail.trim().toLowerCase();
+                
+                let mappedName = approverMapping[userEmail] || '';
+                let savedName = mappedName || sessionStorage.getItem(`approverName_${userEmail}`) || ''; 
+                
+                // ป้องกันกรณี localStorage คืนค่าเป็นคำว่า null/undefined แบบข้อความ
+                if (savedName === 'null' || savedName === 'undefined') savedName = '';
+                
+                let savedSignatureUrl = '';
+                try {
+                    let sigData = await fetchUserSignature(userEmail);
+                    if (!sigData || !sigData.signature) {
+                        if (savedName) {
+                            sigData = await fetchUserSignature(savedName);
+                        }
+                    }
+                    if (sigData && sigData.signature) {
+                        savedSignatureUrl = sigData.signature;
+                    }
+                } catch(e) {
+                    console.warn("Could not fetch saved signature for approver:", e);
+                }
+
+                Swal.fire({ 
+                    title: 'ยืนยันการอนุมัติ',
+                    html: `
+                        <input type="text" id="swal-approver-name" class="swal2-input" placeholder="ชื่อ-สกุล ผู้อนุมัติ" value="${savedName}">
+                        <p style="margin-top: 15px; text-align: left; padding-left: 5%;">รูปแบบลายเซ็น:</p>
+
+                        <div class="signature-tabs swal2-actions" style="justify-content: center; gap: 5px; margin-bottom: 10px; margin-top: 0;">
+                            <button type="button" id="swal-use-saved-sig-btn" class="btn btn-secondary" style="display: ${savedSignatureUrl ? 'inline-block' : 'none'};">ใช้ลายเซ็นเดิม</button>
+                            <button type="button" id="swal-draw-sig-btn" class="btn btn-secondary">วาดลายเซ็น</button>
+                            <button type="button" id="swal-upload-sig-btn" class="btn btn-secondary">อัพโหลด</button>
+                        </div>
+
+                        <div id="swal-saved-container" style="display: none; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: #fafafa;">
+                            <label style="font-weight: normal; color: #22c55e; margin-bottom: 10px; display: block;"><i class="fa-solid fa-circle-check"></i> พบลายเซ็นเดิมในระบบ</label>
+                            <img id="swal-current-signature-image" src="${savedSignatureUrl}" alt="Current Signature" style="max-height: 100px; border-radius: 4px;">
+                        </div>
+
+                        <div id="swal-draw-container" style="display: none;">
+                            <div style="border: 1px dashed #ccc; border-radius: 8px; width:100%; height:150px; margin: 0 auto; background: white;">
+                               <canvas id="swal-signature-canvas" style="cursor: crosshair; touch-action: none;"></canvas>
+                            </div>
+                            <button id="swal-clear-sig" type="button" class="btn btn-secondary" style="margin-top: 5px;"><i class="fa-solid fa-eraser"></i> ล้าง</button>
+                        </div>
+
+                        <div id="swal-upload-container" style="display: none;">
+                            <input type="file" id="swal-signature-upload-input" accept="image/png, image/jpeg" style="display: none;">
+                            <div id="swal-signature-preview-container" style="border: 2px dashed #d1d5db; border-radius: 8px; padding: 10px; min-height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; background: white;">
+                                <span id="swal-upload-placeholder" style="color: #6b7280;"><i class="fa-solid fa-cloud-arrow-up" style="font-size: 2rem; margin-bottom: 5px; display:block;"></i>คลิกเพื่ออัปโหลดไฟล์ภาพ</span>
+                                <img id="swal-signature-preview-image" style="display: none; max-width: 100%; max-height: 130px;">
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonText: 'ยืนยัน',
+                    showCancelButton: true,
+                    customClass: { popup: 'swal2-lg' },
+                    didOpen: () => {
+                        window.swalGlobal = { 
+                            mode: savedSignatureUrl ? 'saved' : 'draw', 
+                            processedSignature: '', 
+                            signatureUrl: savedSignatureUrl 
+                        };
+                        const canvas = document.getElementById('swal-signature-canvas');
+                        
+                        // Fix 3: หน่วงเวลาเพื่อให้ Modal กางจนสุดและวัดขนาด DOM Container ได้แม่นยำ
+                        setTimeout(() => {
+                            const swalContainer = canvas.parentElement;
+                            const containerWidth = swalContainer.offsetWidth > 0 ? swalContainer.offsetWidth : 300; 
+                            const containerHeight = 150; 
+
+                            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                            canvas.width = containerWidth * ratio;
+                            canvas.height = containerHeight * ratio;
+                            canvas.style.width = `${containerWidth}px`; 
+                            canvas.style.height = `${containerHeight}px`; 
+                            canvas.getContext("2d").scale(ratio, ratio);
+                            
+                            window.swalSignaturePad = new SignaturePad(canvas);
+                        }, 150);
+
+                        document.getElementById('swal-clear-sig').onclick = () => {
+                            if(window.swalSignaturePad) window.swalSignaturePad.clear();
+                        };
+
+                        const drawBtn = document.getElementById('swal-draw-sig-btn');
+                        const uploadBtn = document.getElementById('swal-upload-sig-btn');
+                        const savedBtn = document.getElementById('swal-use-saved-sig-btn');
+                        const drawContainer = document.getElementById('swal-draw-container');
+                        const uploadContainer = document.getElementById('swal-upload-container');
+                        const savedContainer = document.getElementById('swal-saved-container');
+                        const uploadInput = document.getElementById('swal-signature-upload-input');
+                        const uploadPreviewClick = document.getElementById('swal-signature-preview-container');
+
+                        function updateSwalMode(mode) {
+                            window.swalGlobal.mode = mode;
+                            drawBtn.classList.toggle('active', mode === 'draw');
+                            uploadBtn.classList.toggle('active', mode === 'upload');
+                            savedBtn.classList.toggle('active', mode === 'saved');
+
+                            drawContainer.style.display = mode === 'draw' ? 'block' : 'none';
+                            uploadContainer.style.display = mode === 'upload' ? 'block' : 'none';
+                            savedContainer.style.display = mode === 'saved' ? 'block' : 'none';
+                        }
+
+                        updateSwalMode(window.swalGlobal.mode);
+
+                        savedBtn.onclick = () => updateSwalMode('saved');
+                        drawBtn.onclick = () => updateSwalMode('draw');
+                        uploadBtn.onclick = () => updateSwalMode('upload');
+                        
+                        uploadPreviewClick.onclick = () => uploadInput.click();
+                        uploadInput.addEventListener('change', (e) => handleSignatureUpload(e, true));
+                    },
+                    preConfirm: () => {
+                        const approverName = document.getElementById('swal-approver-name').value.trim();
+                        if (!approverName) {
+                            Swal.showValidationMessage('กรุณากรอกชื่อผู้อนุมัติ');
+                            return false;
+                        }
+                        const sigGlobal = window.swalGlobal;
+                        const sigPad = window.swalSignaturePad;
+                        
+                        const isDrawEmpty = sigGlobal.mode === 'draw' && (!sigPad || sigPad.isEmpty());
+                        const isUploadEmpty = sigGlobal.mode === 'upload' && !sigGlobal.processedSignature;
+                        const isSavedEmpty = sigGlobal.mode === 'saved' && !sigGlobal.signatureUrl; 
+
+                        if ((sigGlobal.mode === 'draw' && isDrawEmpty) ||
+                            (sigGlobal.mode === 'upload' && isUploadEmpty) ||
+                            (sigGlobal.mode === 'saved' && isSavedEmpty)) {
+                            Swal.showValidationMessage('กรุณาลงลายเซ็น');
+                            return false;
+                        }
+
+                        let signature; 
+                        let signatureToSave; 
+
+                        if (sigGlobal.mode === 'draw') {
+                            signature = sigPad.toDataURL('image/png');
+                            signatureToSave = signature;
+                        } else if (sigGlobal.mode === 'upload') {
+                            signature = sigGlobal.processedSignature;
+                            signatureToSave = signature;
+                        } else {
+                            signature = sigGlobal.signatureUrl;
+                            signatureToSave = null; 
+                        }
+                        
+                        return { approverName, signature, signatureToSave };
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const { approverName, signature, signatureToSave } = result.value;
+                        
+                        if (userEmail) {
+                            sessionStorage.setItem(`approverName_${userEmail}`, approverName);
+                        }
+                        
+                        if (signatureToSave) {
+                            await saveApproverSignature(userEmail, signatureToSave, approverName);
+                            
+                            if (approverName && approverName !== userEmail) {
+                                await saveUserSignature(approverName, signatureToSave);
+                            }
+                        }
+                        
+                        await updateStatus(docNumber, 'approved', { approverName, signature });
+                    }
+                });
+            }
+
+            function handleReject(docNumber) {
+                Swal.fire({
+                    title: 'ยืนยันการไม่อนุมัติ',
+                    input: 'textarea',
+                    inputLabel: 'เหตุผล (จำเป็น)',
+                    inputPlaceholder: 'กรุณาระบุเหตุผล...',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'กรุณาระบุเหตุผลที่ไม่อนุมัติ!'
+                        }
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await updateStatus(docNumber, 'rejected', { reason: result.value });
+                    }
+                });
+            }
+
+            async function updateStatus(docNumber, status, data) {
+                Swal.fire({
+                    title: 'กำลังอัปเดตสถานะ...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+                 try {
+                     const payload = {
+                         action: 'updateQuotationStatus',
+                         data: { docNumber, status, ...data }
+                     };
+                     const response = await fetch(API_URL, {
+                         method: 'POST',
+                         body: JSON.stringify(payload)
+                     });
+                     const result = await response.json();
+                     if (!result.success) throw new Error(result.message);
+
+                     Swal.fire('สำเร็จ!', 'สถานะเอกสารถูกอัปเดตเรียบร้อยแล้ว', 'success').then(() => {
+                         approvalModal.style.display = 'none';
+                         loadApprovalPageData(); 
+                         loadHomePageData(false); // reload แบบซ่อนการแจ้งเตือน
+                     });
+
+                 } catch(error) {
+                     Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถอัปเดตสถานะได้: ${error.message}`, 'error');
+                 }
+            }
+
+            // --- Edit Page Logic ---
+            async function loadEditPageData(showLoader = true) {
+                if (showLoader) {
+                    Swal.fire({
+                        title: 'กำลังโหลดรายการ...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                }
+                try {
+                    // ดึงข้อมูลใหม่เสมอเพื่อป้องกัน Stale Cache
+                    const response = await fetch(`${API_URL}?action=getDocuments`);
+                    const result = await response.json();
+                    if(!result.success) throw new Error(result.message);
+                    
+                    // อัปเดตตัวแปร global เพื่อให้ badges และหน้าอื่นๆ ซิงค์ข้อมูลล่าสุด
+                    allDocuments = result.data.all || [];
+                    updateAllBadges(allDocuments);
+                    
+                    allDocumentsForEdit = allDocuments
+                        .filter(doc => doc.status === 'pending' || doc.status === 'returned')
+                        .sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    displayEditTables(allDocumentsForEdit);
+
+                    if (showLoader) Swal.close();
+                } catch (error) {
+                     Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูลได้: ${error.message}`, 'error');
+                }
+            }
+            
+            function displayEditTables(docs) {
+                const returnedDocs = docs.filter(doc => doc.status === 'returned');
+                const pendingDocs = docs.filter(doc => doc.status === 'pending');
+
+                populateReturnedTable(returnedDocs);
+                populatePendingTable(pendingDocs);
+            }
+            
+            function populateReturnedTable(docs) {
+                editReturnedTableBody.innerHTML = '';
+                if (docs.length === 0) {
+                    editReturnedTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">ไม่พบรายการ</td></tr>';
+                    return;
+                }
+                docs.forEach(doc => {
+                    const row = document.createElement('tr');
+                    // Fix 7 & 8
+                    row.innerHTML = `
+                        <td>${escapeHTML(formatDate(doc.date))}</td>
+                        <td>${escapeHTML(doc.docNumber)}</td>
+                        <td>${escapeHTML(doc.requester)}</td>
+                        <td><span class="status-badge status-returned">${getStatusText(doc.status)}</span></td>
+                        <td>${escapeHTML(doc.rejectionReason || '-')}</td>
+                        <td><button class="btn btn-primary edit-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-pen"></i> แก้ไข</button></td>
+                    `;
+                    editReturnedTableBody.appendChild(row);
+                });
+            }
+
+            function populatePendingTable(docs) {
+                editPendingTableBody.innerHTML = '';
+                if (docs.length === 0) {
+                    editPendingTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ไม่พบรายการ</td></tr>';
+                    return;
+                }
+                docs.forEach(doc => {
+                    const row = document.createElement('tr');
+                    // Fix 7 & 8
+                    row.innerHTML = `
+                        <td>${escapeHTML(formatDate(doc.date))}</td>
+                        <td>${escapeHTML(doc.docNumber)}</td>
+                        <td>${escapeHTML(doc.requester)}</td>
+                        <td><span class="status-badge status-pending">${getStatusText(doc.status)}</span></td>
+                        <td><button class="btn btn-primary edit-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-pen"></i> แก้ไข</button></td>
+                    `;
+                    editPendingTableBody.appendChild(row);
+                });
+            }
+            
+            async function checkApproverLogin(showLoader = true) {
+                // ปรับปรุงการตรวจสอบ Session โดยตัดช่องว่างทิ้ง
+                const userEmail = (sessionStorage.getItem('approverEmail') || '').trim().toLowerCase();
+                
+                if (userEmail) {
+                    // หาก approverEmails โหลดข้อมูลมาแล้ว และอีเมลไม่มีสิทธิ์
+                    if (approverEmails.length > 0 && !approverEmails.includes(userEmail)) {
+                        approveLoginSection.style.display = 'block';
+                        approveContentSection.style.display = 'none';
+                    } else {
+                        // หากมีสิทธิ์ หรือยังโหลดข้อมูล Array ไม่เสร็จ (ยอมให้ผ่านไปก่อนเดี๋ยวโดนตรวจตอนกดปุ่มอีกที)
+                        approveLoginSection.style.display = 'none';
+                        approveContentSection.style.display = 'block';
+                        userEmailDisplay.textContent = `Logged in as: ${userEmail}`;
+                        await loadApprovalPageData(showLoader);
+                    }
+                } else {
+                    approveLoginSection.style.display = 'block';
+                    approveContentSection.style.display = 'none';
+                }
+            }
+
+            // --- Documents Page Logic ---
+            async function loadDocumentsPageData(showLoader = true) {
+                if (showLoader) {
+                     Swal.fire({
+                        title: 'กำลังโหลดคลังเอกสาร...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                }
+                try {
+                    // ดึงข้อมูลใหม่เสมอเพื่อป้องกัน Stale Cache
+                    const response = await fetch(`${API_URL}?action=getDocuments`);
+                    const result = await response.json();
+                    if(!result.success) throw new Error(result.message);
+                    
+                    // อัปเดตตัวแปร global
+                    allDocuments = result.data.all || [];
+                    updateAllBadges(allDocuments);
+                    
+                    processedDocuments = allDocuments
+                        .filter(doc => doc.status !== 'pending') 
+                        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    // Reset search input เมื่อโหลดข้อมูลใหม่
+                    const searchInput = document.getElementById('doc-search-input');
+                    if (searchInput) searchInput.value = '';
+                    
+                    displayDocumentsTable(processedDocuments);
+                    if (showLoader) Swal.close();
+                } catch (error) {
+                     Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดคลังเอกสารได้: ${error.message}`, 'error');
+                }
+            }
+            
+            function displayDocumentsTable(docs) {
+                documentsTableBody.innerHTML = '';
+                 if (docs.length === 0) {
+                    documentsTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">ไม่พบเอกสาร</td></tr>'; 
+                    return;
+                }
+                docs.forEach(doc => {
+                    const row = document.createElement('tr');
+                    let statusClass = '';
+                    switch (doc.status) {
+                        case 'pending': statusClass = 'status-pending'; break;
+                        case 'approved': statusClass = 'status-approved'; break;
+                        case 'rejected': statusClass = 'status-rejected'; break;
+                        case 'returned': statusClass = 'status-returned'; break;
+                    }
+                    // Fix 7 & 8
+                    row.innerHTML = `
+                        <td>${escapeHTML(formatDate(doc.date))}</td>
+                        <td>${escapeHTML(doc.docNumber)}</td>
+                        <td>${escapeHTML(doc.requester)}</td>
+                        <td>${escapeHTML(doc.contactName || '')}</td> 
+                        <td>${escapeHTML(doc.companyName || '')}</td> 
+                        <td><span class="status-badge ${statusClass}">${getStatusText(doc.status)}</span></td>
+                        <td><button class="btn btn-secondary preview-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-eye"></i> พรีวิว</button></td>
+                    `;
+                    documentsTableBody.appendChild(row);
+                });
+            }
+
+             function filterDocuments() {
+                const searchTerm = editSearchInput.value.trim().toLowerCase();
+                if (!searchTerm) {
+                    displayEditTables(allDocumentsForEdit);
+                    return;
+                }
+                const filtered = allDocumentsForEdit.filter(doc => {
+                    try {
+                        const docNumber = doc.docNumber ? String(doc.docNumber).toLowerCase() : '';
+                        const requester = doc.requester ? String(doc.requester).toLowerCase() : '';
+                        return docNumber.includes(searchTerm) || requester.includes(searchTerm);
+                    } catch (err) {
+                        console.error("Error filtering document for edit:", doc, err);
+                        return false;
+                    }
+                });
+                displayEditTables(filtered);
+            }
+
+            async function showPreview(docNumber) {
+                Swal.fire({
+                    title: 'กำลังสร้างพรีวิว...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const response = await fetch(`${API_URL}?action=getQuotationDetails&docNumber=${docNumber}`);
+                    const result = await response.json();
+                    if (!result.success) throw new Error(result.message);
+                    
+                    currentPreviewData = result.data; 
+                    const previewContainer = document.getElementById('preview-template-container');
+                    previewContainer.innerHTML = generateTemplateHTML(currentPreviewData);
+                    
+                    adjustFontSizeToFitPage('preview-template-container'); 
+
+                    downloadPdfBtn.onclick = () => downloadPDF(currentPreviewData); 
+
+                    Swal.close();
+                    previewModal.style.display = 'block';
+                } catch (error) {
+                    Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถสร้างพรีวิวได้: ${error.message}`, 'error');
+                }
+            }
+
+            // --- Download PDF ---
+            async function downloadPDF(data) {
+                if(typeof jspdf === 'undefined' || typeof html2canvas === 'undefined') {
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดไลบรารีสำหรับสร้าง PDF ได้', 'error');
+                    return;
+                }
+                
+                Swal.fire({
+                    title: 'กำลังสร้างไฟล์ PDF...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                const { jsPDF } = jspdf;
+                const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+                const A4_WIDTH_MM = 210;
+                const A4_HEIGHT_MM = 297;
+                const PADDING_MM = 15; 
+                const contentWidthMm = A4_WIDTH_MM - (PADDING_MM * 2);
+
+                const ITEMS_PER_PAGE = 10;
+                const allItems = data.items || [];
+                const renderContainer = document.getElementById('pdf-render-container');
+
+                // แบ่งข้อมูลรายการสินค้าเป็น chunk
+                const chunks = [];
+                if (allItems.length === 0) {
+                    chunks.push([]);
+                } else {
+                    for (let i = 0; i < allItems.length; i += ITEMS_PER_PAGE) {
+                        chunks.push(allItems.slice(i, i + ITEMS_PER_PAGE));
+                    }
+                }
+
+                try {
+                    for (let i = 0; i < chunks.length; i++) {
+                        const chunkItems = chunks[i];
+                        const isLastPage = (i === chunks.length - 1);
+
+                        // Render HTML สำหรับแต่ละหน้า พร้อมส่ง startIndex เพื่อรันเลขลำดับต่อ
+                        renderContainer.innerHTML = generateTemplateHTML(data, {
+                            itemsToRender: chunkItems,
+                            showFooter: isLastPage,
+                            startIndex: i * ITEMS_PER_PAGE
+                        });
+
+                        // รอให้ DOM เรนเดอร์เสร็จ
+                        await new Promise(r => setTimeout(r, 100));
+
+                        // 💡 สำคัญ: ใช้ querySelector ดึงจาก renderContainer และใช้ Class แทน ID 
+                        // เพื่อป้องกันการชนกับ Element ใน Modal พรีวิว
+                        const part1 = renderContainer.querySelector('.pdf-part-1');
+                        if (!part1) continue;
+
+                        const canvasOptions = { scale: 3, useCORS: true, logging: false };
+
+                        const canvas1 = await html2canvas(part1, canvasOptions);
+                        const imgData1 = canvas1.toDataURL('image/jpeg', 0.98);
+                        const imgProps1 = pdf.getImageProperties(imgData1);
+                        const pdfHeight1 = (imgProps1.height * contentWidthMm) / imgProps1.width;
+                        
+                        if (i > 0) {
+                            pdf.addPage();
+                        }
+                        pdf.addImage(imgData1, 'JPEG', PADDING_MM, PADDING_MM, contentWidthMm, pdfHeight1);
+
+                        // จัดการส่วนท้าย (part2) ในหน้าสุดท้าย
+                        if (isLastPage) {
+                            const part2 = renderContainer.querySelector('.pdf-part-2');
+                            if (part2) {
+                                const canvas2 = await html2canvas(part2, canvasOptions);
+                                const imgData2 = canvas2.toDataURL('image/jpeg', 0.98);
+                                const imgProps2 = pdf.getImageProperties(imgData2);
+                                const pdfHeight2 = (imgProps2.height * contentWidthMm) / imgProps2.width;
+
+                                const currentY = PADDING_MM + pdfHeight1 + 5; 
+                                
+                                // ถ้าพื้นที่ไม่พอ ให้ขึ้นหน้าใหม่
+                                if (currentY + pdfHeight2 > (A4_HEIGHT_MM - PADDING_MM)) {
+                                    pdf.addPage();
+                                    pdf.addImage(imgData2, 'JPEG', PADDING_MM, PADDING_MM, contentWidthMm, pdfHeight2);
+                                } else {
+                                    pdf.addImage(imgData2, 'JPEG', PADDING_MM, currentY, contentWidthMm, pdfHeight2);
+                                }
+                            }
+                        }
+                    }
+
+                    const docNumber = data.docNumber ? data.docNumber.toString().replace(/'/g, '') : 'Unknown';
+                    pdf.save(`Quotation-${docNumber}.pdf`);
+                    Swal.close();
+
+                } catch (error) {
+                    console.error("Error generating PDF:", error);
+                    Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถสร้าง PDF ได้: ${error.message}`, 'error');
+                } finally {
+                    renderContainer.innerHTML = '';
+                }
+            }
+
+
+            // --- Settings Page Logic ---
+            function handleLogoUpload(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        logoBase64 = event.target.result;
+                        logoPreview.src = logoBase64;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            async function saveLogo() {
+                if (!logoBase64) {
+                    Swal.fire('ข้อผิดพลาด', 'กรุณาเลือกไฟล์โลโก้ก่อน', 'error');
+                    return;
+                }
+                Swal.fire({
+                    title: 'กำลังอัปโหลด...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+                try {
+                    const payload = { action: 'uploadLogo', data: logoBase64 };
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if(result.success) {
+                        navbarLogo.src = result.url;
+                        Swal.fire('สำเร็จ!', 'อัปโหลดโลโก้เรียบร้อย', 'success');
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch(error) {
+                    Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถอัปโหลดโลโก้ได้: ${error.message}`, 'error');
+                }
+            }
+
+            async function loadLogo() {
+                let logoUrl = '';
+                    try {
+                        const response = await fetch(`${API_URL}?action=getLogo`);
+                        const result = await response.json();
+                        if(result.success && result.url){
+                            logoUrl = result.url;
+                        }
+                    } catch(error){
+                        console.error("Could not fetch logo from server:", error);
+                    }
+                 if(logoUrl){
+                    navbarLogo.src = logoUrl;
+                    logoPreview.src = logoUrl;
+                 }
+            }
+
+            // --- Navigation Logic ---
+            async function handleNavigation(hash) {
+                if (!hash.includes('create') && editingDocNumber) {
+                   resetCreateFormState();
+                }
+
+                const targetId = hash ? hash.substring(1) : 'home';
+                
+                pages.forEach(page => page.classList.remove('active'));
+                const activePage = document.getElementById(targetId);
+                if (activePage) activePage.classList.add('active');
+
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${targetId}`);
+                });
+
+                if (targetId === 'home') await loadHomePageData();
+                else if (targetId === 'create') initializeSignaturePad();
+                else if (targetId === 'approve') await checkApproverLogin();
+                else if (targetId === 'documents') await loadDocumentsPageData();
+                else if (targetId === 'edit') await loadEditPageData();
+            }
+            
+            // --- Create/Edit Quotation Page Logic ---
+            function resetCreateFormState() {
+                quotationForm.reset();
+                updateExpiryDate(); 
+                if (signaturePad) signaturePad.clear();
+                processedSignatureBase64 = '';
+                signatureUploadInput.value = '';
+                
+                signaturePreviewImage.src = '';
+                signaturePreviewImage.style.display = 'none';
+                uploadPlaceholderText.style.display = 'block';
+
+                document.getElementById('current-signature-image').src = '';
+                currentSignatureUrl = ''; 
+                useSavedSigBtn.style.display = 'none';
+                
+                switchSignatureMode('draw');
+
+                itemTableBody.innerHTML = '';
+                createItemRow();
+                calculateTotals();
+                editingDocNumber = null;
+                currentEditDocDate = null; // รีเซ็ตเมื่อเคลียร์ฟอร์ม
+                
+                const submitBtn = document.getElementById('submit-quotation-btn');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ขออนุมัติ';
+            }
+
+            async function populateFormForEdit(docNumber) {
+                 Swal.fire({
+                    title: 'กำลังโหลดข้อมูลเพื่อแก้ไข...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+                try {
+                    const response = await fetch(`${API_URL}?action=getQuotationDetails&docNumber=${docNumber}`);
+                    const result = await response.json();
+                     if (!result.success) throw new Error(result.message);
+                    
+                    const data = result.data;
+                    
+                    document.getElementById('contact-name').value = data.contactName || '';
+                    document.getElementById('contact-phone').value = data.contactPhone ? data.contactPhone.toString().replace(/'/g, '') : '';
+                    document.getElementById('company-name').value = data.companyName || '';
+                    document.getElementById('address').value = data.address || '';
+                    document.getElementById('delivery-date').value = formatDateForInput(data.deliveryDate);
+                    document.getElementById('credit-days').value = data.creditDays || 0;
+                    document.getElementById('machine-model').value = data.machineModel || '';
+                    document.getElementById('technician').value = data.technician || '';
+                    document.getElementById('proposer-phone').value = data.proposerPhone ? data.proposerPhone.toString().replace(/'/g, '') : '';
+                    document.getElementById('remarks').value = data.remarks || '';
+                    document.getElementById('approver-name').value = data.requester || '';
+
+                    // เก็บวันที่ของเอกสารเดิมไว้เป็นฐานในการคำนวณ
+                    currentEditDocDate = data.date; 
+
+                    // ฟื้นฟูค่า expiry-days และ expiry-date จากข้อมูลเดิม
+                    if (data.expiryDate && data.date) {
+                        const startDate = new Date(data.date);
+                        const endDate = new Date(data.expiryDate);
+                        if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                            const diffTime = endDate - startDate;
+                            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                            document.getElementById('expiry-days').value = diffDays > 0 ? diffDays : 30;
+                        }
+                    } else {
+                        document.getElementById('expiry-days').value = 30;
+                    }
+                    document.getElementById('expiry-date').value = formatDateForInput(data.expiryDate);
+
+                    if (data.signatureUrl) {
+                        document.getElementById('current-signature-image').src = data.signatureUrl;
+                        currentSignatureUrl = data.signatureUrl; 
+                        useSavedSigBtn.style.display = 'inline-block';
+                        switchSignatureMode('saved');
+                    } else {
+                        switchSignatureMode('draw');
+                    }
+
+                    itemTableBody.innerHTML = ''; 
+                    if(data.items && data.items.length > 0) {
+                        data.items.forEach(item => {
+                            createItemRow(item);
+                        });
+                    } else {
+                        createItemRow(); 
+                    }
+
+                    calculateTotals();
+                    // updateExpiryDate(); // ❌ นำออกเพื่อไม่ให้เขียนทับวันหมดอายุเดิมด้วยวันที่ปัจจุบัน
+
+                    editingDocNumber = docNumber;
+                    document.getElementById('submit-quotation-btn').innerHTML = '<i class="fa-solid fa-save"></i> บันทึกการแก้ไข';
+                    
+                    Swal.close();
+                    window.location.hash = '#create';
+
+                } catch (error) {
+                    Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูลใบเสนอราคาได้: ${error.message}`, 'error');
+                }
+            }
+
+
+            function createItemRow(itemData = null) {
+                const row = document.createElement('tr');
+                // Fix 5 & 9: ใช้ Optional Chaining (?.) ควบคู่กับ escapeHTML ป้องกัน HTML attribute พังจากเครื่องหมายคำพูด (")
+                row.innerHTML = `
+                    <td><input type="text" name="itemCode" class="item-input" placeholder="รหัส" required value="${escapeHTML(itemData?.code ?? '')}"></td>
+                    <td><input type="text" name="itemName" class="item-input" placeholder="ชื่อ" required value="${escapeHTML(itemData?.name ?? '')}"></td>
+                    <td><input type="number" name="itemQty" class="item-input" min="1" required value="${escapeHTML(itemData?.quantity ?? '1')}"></td>
+                    <td><input type="number" name="itemPrice" class="item-input" min="0" step="any" required value="${escapeHTML(itemData?.unitPrice ?? '0')}"></td>
+                    <td><input type="number" name="itemDiscount" class="item-input" min="0" max="100" step="any" required value="${escapeHTML(itemData?.discount ?? '0')}"></td>
+                    <td><input type="text" name="itemNetPrice" class="item-input" readonly></td>
+                    <td><button type="button" class="btn btn-reject remove-item-btn"><i class="fa-solid fa-trash"></i></button></td>
+                `;
+                itemTableBody.appendChild(row);
+                updateRemoveButtons();
+            }
+
+            function updateRemoveButtons() {
+                const rows = itemTableBody.querySelectorAll('tr');
+                rows.forEach((row, index) => {
+                    row.querySelector('.remove-item-btn').disabled = rows.length === 1;
+                });
+            }
+
+            function calculateTotals() {
+                let subtotal = 0;
+                let netTotal = 0;
+                const rows = itemTableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const qty = parseFloat(row.querySelector('[name="itemQty"]').value) || 0;
+                    const price = parseFloat(row.querySelector('[name="itemPrice"]').value) || 0;
+                    const discount = parseFloat(row.querySelector('[name="itemDiscount"]').value) || 0;
+                    
+                    const totalBeforeDiscount = qty * price;
+                    const discountAmount = totalBeforeDiscount * (discount / 100);
+                    const finalPrice = totalBeforeDiscount - discountAmount;
+                    
+                    row.querySelector('[name="itemNetPrice"]').value = formatCurrency(finalPrice);
+                    
+                    subtotal += totalBeforeDiscount;
+                    netTotal += finalPrice;
+                });
+
+                const totalDiscount = subtotal - netTotal;
+                const vat = netTotal * 0.07;
+                const grandTotal = netTotal + vat;
+
+                document.getElementById('subtotal').textContent = `${formatCurrency(subtotal)} บาท`;
+                document.getElementById('total-discount').textContent = `${formatCurrency(totalDiscount)} บาท`;
+                document.getElementById('net-total').textContent = `${formatCurrency(netTotal)} บาท`;
+                document.getElementById('vat').textContent = `${formatCurrency(vat)} บาท`;
+                document.getElementById('grand-total').textContent = `${formatCurrency(grandTotal)} บาท`;
+            }
+            
+            function updateExpiryDate() {
+                const daysInput = document.getElementById('expiry-days');
+                if(!daysInput.value) { 
+                    daysInput.value = 30;
+                }
+                const days = parseInt(daysInput.value, 10);
+
+                if (days > 0) {
+                    // ใช้ currentEditDocDate เป็นฐานถ้าอยู่ในโหมดแก้ไข แต่ถ้าไม่มีให้ใช้วันนี้
+                    const baseDate = currentEditDocDate ? new Date(currentEditDocDate) : new Date();
+                    if (!isNaN(baseDate.getTime())) {
+                        baseDate.setDate(baseDate.getDate() + days);
+                        document.getElementById('expiry-date').value = baseDate.toISOString().split('T')[0];
+                    }
+                }
+            }
+            
+            async function handleQuotationSubmit(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submit-quotation-btn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังประมวลผล...';
+
+                const enableSubmitButton = () => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = editingDocNumber 
+                        ? '<i class="fa-solid fa-save"></i> บันทึกการแก้ไข' 
+                        : '<i class="fa-solid fa-paper-plane"></i> ขออนุมัติ';
+                };
+
+                if (!quotationForm.checkValidity()) {
+                    Swal.fire('ข้อผิดพลาด', 'กรุณากรอกข้อมูลที่จำเป็น (*) ให้ครบถ้วน', 'error');
+                    quotationForm.reportValidity(); 
+                    enableSubmitButton();
+                    return;
+                }
+
+                const isDrawSignatureEmpty = signatureMode === 'draw' && (!signaturePad || signaturePad.isEmpty());
+                const isUploadSignatureEmpty = signatureMode === 'upload' && !processedSignatureBase64;
+                const isSavedSignatureEmpty = signatureMode === 'saved' && !currentSignatureUrl;
+
+                if ((signatureMode === 'draw' && isDrawSignatureEmpty) || 
+                    (signatureMode === 'upload' && isUploadSignatureEmpty) || 
+                    (signatureMode === 'saved' && isSavedSignatureEmpty)) {
+                    Swal.fire('ข้อผิดพลาด', 'กรุณาใส่ลายเซ็นผู้ขออนุมัติ', 'error');
+                    enableSubmitButton(); 
+                    return;
+                }
+                
+                const itemRows = Array.from(itemTableBody.querySelectorAll('tr'));
+                if (itemRows.length === 0) {
+                     Swal.fire('ข้อผิดพลาด', 'กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ', 'error');
+                    enableSubmitButton();
+                    return;
+                }
+
+                const action = editingDocNumber ? 'updateQuotation' : 'createQuotation';
+                const loadingTitle = editingDocNumber ? 'กำลังบันทึกการแก้ไข...' : 'กำลังสร้างเอกสาร...';
+                
+                Swal.fire({
+                    title: loadingTitle,
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const formData = new FormData(quotationForm);
+                    const data = Object.fromEntries(formData.entries());
+                    data.requester = data.approverName; 
+
+                    let signatureToSave; 
+                    
+                    if (signatureMode === 'draw') {
+                        data.signature = signaturePad.toDataURL('image/png');
+                        signatureToSave = data.signature; 
+                    } else if (signatureMode === 'upload') {
+                        data.signature = processedSignatureBase64;
+                        signatureToSave = data.signature; 
+                    } else { // saved
+                        data.signature = currentSignatureUrl; 
+                        signatureToSave = null; 
+                    }
+
+                    data.grandTotal = document.getElementById('grand-total').textContent;
+                    data.items = itemRows.map(row => ({
+                        code: row.querySelector('[name="itemCode"]').value,
+                        name: row.querySelector('[name="itemName"]').value,
+                        quantity: row.querySelector('[name="itemQty"]').value,
+                        unitPrice: row.querySelector('[name="itemPrice"]').value,
+                        discount: row.querySelector('[name="itemDiscount"]').value,
+                        // Fix: เช็คค่า null ป้องกัน Error ตอน Replace
+                        netPrice: (row.querySelector('[name="itemNetPrice"]').value || '0').replace(/[^0-9.-]+/g,"")
+                    }));
+
+                    let docNumber;
+                    if (editingDocNumber) {
+                        docNumber = editingDocNumber;
+                        data.docNumber = docNumber;
+                    } else {
+                         const numResponse = await fetch(API_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'generateDocNumber' })
+                        });
+                        const numResult = await numResponse.json();
+                        if (!numResult.success) throw new Error(numResult.message);
+                        docNumber = numResult.docNumber;
+                        data.docNumber = docNumber;
+                    }
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: action, data: data })
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        
+                        // ถ้าเลือกลายเซ็นใหม่ จะบันทึกลงชีต Users
+                        if (signatureToSave) {
+                           await saveUserSignature(data.requester, signatureToSave);
+                        }
+
+                        const successTitle = editingDocNumber ? 'แก้ไขสำเร็จ!' : 'สำเร็จ!';
+                        const successMessage = editingDocNumber ? 'ใบเสนอราคาถูกแก้ไขและส่งเพื่อขออนุมัติใหม่เรียบร้อยแล้ว' : 'ใบเสนอราคาถูกสร้างและส่งเพื่อขออนุมัติเรียบร้อยแล้ว';
+                        
+                        Swal.fire(successTitle, successMessage, 'success').then(() => {
+                            resetCreateFormState();
+                            window.location.hash = '#home';
+                        });
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    const errorTitle = editingDocNumber ? 'เกิดข้อผิดพลาดในการแก้ไข' : 'เกิดข้อผิดพลาดในการสร้าง';
+                    Swal.fire(errorTitle, `${error.message}`, 'error');
+                    enableSubmitButton(); 
+                }
+            }
+
+            // --- ฟังก์ชันดึงข้อมูลผู้อนุมัติจาก Sheet ---
+            function loadApprovers() {
+                // เรียกใช้พื้นหลัง ไม่แสดงผลข้อผิดพลาดให้รกหูรกตา
+                fetch(`${API_URL}?action=getApprovers`)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success && result.data) {
+                            approverMapping = {};
+                            approverEmails = [];
+                            result.data.forEach(appr => {
+                                if (appr.email) {
+                                    // เพิ่ม trim() และ toLowerCase() เพื่อป้องกันเรื่อง Case Sensitive หรือช่องว่างแฝง
+                                    const cleanEmail = appr.email.trim().toLowerCase();
+                                    const cleanName = appr.name ? String(appr.name).trim() : '';
+                                    
+                                    approverMapping[cleanEmail] = cleanName;
+                                    approverEmails.push(cleanEmail);
+                                    
+                                    if (appr.signatureUrl) {
+                                        allUsersSignatures[cleanEmail] = appr.signatureUrl;
+                                        if (cleanName) {
+                                            allUsersSignatures[cleanName] = appr.signatureUrl;
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    })
+                    .catch(e => console.error("Failed to load approvers:", e));
+            }
+
+            // --- ฟังก์ชันบันทึกลายเซ็นผู้อนุมัติลง Sheet Approvers ---
+            async function saveApproverSignature(email, signatureBase64, name) {
+                 if (!email || !signatureBase64) return;
+                 try {
+                     const payload = {
+                         action: 'saveApproverSignature',
+                         data: { email, signatureBase64, name }
+                     };
+                     const response = await fetch(API_URL, {
+                         method: 'POST',
+                         body: JSON.stringify(payload)
+                     });
+                     const result = await response.json();
+                     if (result.success) {
+                         console.log("Approver signature saved to sheet.");
+                         const cleanEmail = email.trim().toLowerCase();
+                         allUsersSignatures[cleanEmail] = result.signatureUrl; 
+                         if (approverMapping[cleanEmail]) {
+                             allUsersSignatures[approverMapping[cleanEmail]] = result.signatureUrl;
+                         }
+                         return result;
+                     }
+                 } catch(e) {
+                     console.error("Error saving approver signature:", e);
+                 }
+            }
+
+            // --- ฟังก์ชันสำหรับดึงและบันทึกลายเซ็นผู้ใช้งานทั่วไป ---
+            function loadAllUsersSignatures() {
+                fetch(`${API_URL}?action=getAllUsers`)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success && result.data) {
+                            result.data.forEach(user => {
+                                if(user.userIdentifier && user.signatureUrl) {
+                                    allUsersSignatures[user.userIdentifier] = user.signatureUrl;
+                                }
+                            });
+                        }
+                    })
+                    .catch(e => console.error("Failed to preload user signatures:", e));
+            }
+
+            async function fetchUserSignature(userIdentifier) {
+                if (!userIdentifier) return null;
+
+                const cleanInput = userIdentifier.replace(/\s+/g, '').toLowerCase();
+                let matchedSignature = null;
+                let matchedSavedName = null;
+
+                for (const [savedName, signatureUrl] of Object.entries(allUsersSignatures)) {
+                    const cleanSavedName = savedName.replace(/\s+/g, '').toLowerCase();
+                    if (cleanSavedName === cleanInput) {
+                        matchedSignature = signatureUrl;
+                        matchedSavedName = savedName; 
+                        break;
+                    }
+                }
+
+                if (!matchedSignature && cleanInput.length >= 2) {
+                    for (const [savedName, signatureUrl] of Object.entries(allUsersSignatures)) {
+                        const cleanSavedName = savedName.replace(/\s+/g, '').toLowerCase();
+                        if (cleanSavedName.startsWith(cleanInput)) {
+                            matchedSignature = signatureUrl;
+                            matchedSavedName = savedName;
+                            break;
+                        }
+                    }
+                }
+
+                if (matchedSignature) {
+                    return { success: true, signature: matchedSignature, actualSavedName: matchedSavedName };
+                }
+
+                return null;
+            }
+
+            async function saveUserSignature(userIdentifier, signatureBase64) {
+                 if (!userIdentifier || !signatureBase64) return;
+                 try {
+                     const payload = {
+                         action: 'saveUserSignature',
+                         data: { userIdentifier, signatureBase64 }
+                     };
+                     const response = await fetch(API_URL, {
+                         method: 'POST',
+                         body: JSON.stringify(payload)
+                     });
+                     const result = await response.json();
+                     if (result.success) {
+                         allUsersSignatures[userIdentifier] = result.signatureUrl; 
+                         return result;
+                     } 
+                 } catch(e) {
+                     console.error("Error saving user signature:", e);
+                 }
+            }
+
+
+            // --- Event Listeners Setup ---
+            navbarToggle.addEventListener('click', () => navbarMenu.classList.toggle('active'));
+            
+            // เมนูคลิก
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.hash = link.getAttribute('href');
+                    if (navbarMenu.classList.contains('active')) {
+                        navbarMenu.classList.remove('active');
+                    }
+                });
+            });
+            
+            window.addEventListener('hashchange', () => {
+                handleNavigation(window.location.hash);
+            });
+            
+            loginGoogleBtn.addEventListener('click', () => {
+                 Swal.fire({
+                    title: 'เข้าสู่ระบบผู้อนุมัติ',
+                    input: 'email',
+                    inputLabel: 'กรุณากรอกอีเมลของคุณ',
+                    inputPlaceholder: 'user@example.com',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                        if (!value) return 'คุณต้องกรอกอีเมล!';
+                        const cleanVal = value.trim().toLowerCase();
+                        // เผื่อกรณียังโหลด array ไม่เสร็จ
+                        if (approverEmails.length > 0 && !approverEmails.includes(cleanVal)) {
+                            return 'อีเมลนี้ไม่มีสิทธิ์ในการอนุมัติ (ไม่ได้อยู่ในชีต Approvers)';
+                        }
+                    }
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        sessionStorage.setItem('approverEmail', result.value.trim().toLowerCase());
+                        checkApproverLogin();
+                    }
+                });
+            });
+            
+            closeModalBtn.onclick = () => approvalModal.style.display = 'none';
+            closePreviewModalBtn.onclick = () => previewModal.style.display = 'none';
+            window.onclick = (event) => {
+                if (event.target == approvalModal || event.target == previewModal) {
+                    approvalModal.style.display = "none";
+                    previewModal.style.display = "none";
+                }
+            }
+            documentsTableBody.addEventListener('click', e => {
+                if (e.target.closest('.preview-btn')) {
+                    const docNumber = e.target.closest('.preview-btn').dataset.docNumber;
+                    showPreview(docNumber);
+                }
+            });
+            
+            const editPage = document.getElementById('edit');
+            editPage.addEventListener('click', e => {
+                if (e.target.closest('.edit-btn')) {
+                    const docNumber = e.target.closest('.edit-btn').dataset.docNumber;
+                    populateFormForEdit(docNumber);
+                }
+            });
+
+            document.getElementById('doc-search-input').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.trim().toLowerCase();
+                // ถ้า search ว่างเปล่า แสดงทั้งหมด
+                if (!searchTerm) {
+                    displayDocumentsTable(processedDocuments);
+                    return;
+                }
+                const filtered = processedDocuments.filter(doc => {
+                    try {
+                        const docNumber = doc.docNumber ? String(doc.docNumber).toLowerCase() : '';
+                        const requester = doc.requester ? String(doc.requester).toLowerCase() : '';
+                        const contactName = doc.contactName ? String(doc.contactName).toLowerCase() : '';
+                        const companyName = doc.companyName ? String(doc.companyName).toLowerCase() : '';
+                        
+                        return docNumber.includes(searchTerm) ||
+                               requester.includes(searchTerm) ||
+                               contactName.includes(searchTerm) ||
+                               companyName.includes(searchTerm);
+                    } catch (err) {
+                        console.error("Error filtering document:", doc, err);
+                        return false;
+                    }
+                });
+                displayDocumentsTable(filtered);
+            });
+            editSearchInput.addEventListener('input', filterDocuments);
+            
+            logoUpload.addEventListener('change', handleLogoUpload);
+            saveLogoBtn.addEventListener('click', saveLogo);
+            addItemBtn.addEventListener('click', () => createItemRow());
+            itemTableBody.addEventListener('click', e => {
+                if (e.target.closest('.remove-item-btn')) {
+                    e.target.closest('tr').remove();
+                    updateRemoveButtons();
+                    calculateTotals();
+                }
+            });
+            itemTableBody.addEventListener('input', e => {
+                 if (e.target.classList.contains('item-input')) {
+                    calculateTotals();
+                }
+            });
+
+            approverNameInput.addEventListener('blur', async () => {
+                const name = approverNameInput.value.trim();
+                const spinner = document.getElementById('signature-loading-spinner');
+
+                if (name) {
+                    spinner.style.display = 'inline-block';
+                    try {
+                        const sigData = await fetchUserSignature(name);
+                        if (sigData && sigData.signature) {
+                            currentSignatureUrl = sigData.signature; 
+                            document.getElementById('current-signature-image').src = sigData.signature;
+                            useSavedSigBtn.style.display = 'inline-block';
+                            switchSignatureMode('saved');
+                            
+                            if (sigData.actualSavedName && name !== sigData.actualSavedName) {
+                                approverNameInput.value = sigData.actualSavedName;
+                            }
+                            
+                        } else {
+                            currentSignatureUrl = '';
+                            useSavedSigBtn.style.display = 'none';
+                            if (signatureMode === 'saved') switchSignatureMode('draw');
+                        }
+                    } catch (e) {
+                        console.error("Error fetching sig on blur:", e);
+                        currentSignatureUrl = '';
+                        useSavedSigBtn.style.display = 'none';
+                        if (signatureMode === 'saved') switchSignatureMode('draw');
+                    } finally {
+                        spinner.style.display = 'none'; 
+                    }
+                } else {
+                    currentSignatureUrl = '';
+                    useSavedSigBtn.style.display = 'none';
+                    if (signatureMode === 'saved') switchSignatureMode('draw');
+                }
+            });
+
+            document.getElementById('expiry-days').addEventListener('input', updateExpiryDate);
+            quotationForm.addEventListener('submit', handleQuotationSubmit);
+
+            drawSigBtn.addEventListener('click', () => switchSignatureMode('draw'));
+            uploadSigBtn.addEventListener('click', () => switchSignatureMode('upload'));
+            useSavedSigBtn.addEventListener('click', () => switchSignatureMode('saved'));
+            
+            signaturePreviewContainer.addEventListener('click', () => {
+                if (signatureMode === 'upload') signatureUploadInput.click();
+            });
+            signatureUploadInput.addEventListener('change', (e) => handleSignatureUpload(e, false));
+
+            // --- Initial Load Logic ---
+            function initApp() {
+                // 1. นำผู้ใช้เข้าสู่หน้าเว็บตาม URL ทันที
+                handleNavigation(window.location.hash || '#home'); 
+                
+                // 2. โหลดข้อมูลอื่นๆ ไว้เบื้องหลัง (Background Fetch) แบบเงียบๆ
+                loadLogo();
+                loadApprovers();
+                loadAllUsersSignatures();
+            }
+
+            // เริ่มการทำงาน
+            initApp(); 
+        };
+    </script>
+</body>
+</html>
