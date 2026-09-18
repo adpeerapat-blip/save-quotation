@@ -17,24 +17,30 @@
     <!-- jsPDF and html2canvas for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
         :root {
-            --primary-blue: #3b82f6;
-            --primary-blue-dark: #2563eb;
-            --secondary-blue: #60a5fa;
-            --dark-blue: #1e3a8a;
-            --nav-bg: #0891b2; /* สีฟ้าเขียว */
-            --nav-active: #0e7490; /* สีฟ้าเขียวเข้มสำหรับปุ่มที่ถูกเลือก */
-            --nav-indicator: #67e8f9; /* สีขอบแถบเมนูด้านซ้าย */
+            /* --- Modern Color Palette --- */
+            --primary-blue: #4f46e5;      /* Indigo 600 */
+            --primary-blue-dark: #4338ca; /* Indigo 700 */
+            --secondary-blue: #a5b4fc;    /* Indigo 300 */
+            --dark-blue: #312e81;         /* Indigo 900 */
+            --nav-bg: #111827;            /* Gray 900 - Dark Slate */
+            --nav-active: #1f2937;        /* Gray 800 */
+            --nav-indicator: var(--primary-blue);
             --green: #22c55e;
             --red: #ef4444;
             --orange: #f97316;
             --yellow: #ca8a04;
-            --gray-bg: #f3f4f6;
+            --gray-bg: #f9fafb;           /* Gray 50 */
             --gray-text: #6b7280;
             --dark-text: #1f2937;
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            /* --- Modern Shadows --- */
+            --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --card-shadow-lg: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --input-border: #d1d5db;
         }
 
@@ -73,7 +79,7 @@
         
         /* --- Navbar (Sidebar Layout) --- */
         .navbar {
-            background-color: var(--nav-bg);
+            background: var(--nav-bg);
             color: white;
             padding: 2rem 1.5rem;
             display: flex;
@@ -85,7 +91,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: var(--card-shadow-lg);
             z-index: 1000;
             overflow-y: auto;
         }
@@ -132,13 +138,14 @@
         }
 
         .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: var(--nav-active);
             transform: translateX(5px);
         }
 
         .nav-link.active {
             background-color: var(--nav-active);
-            box-shadow: 4px 0 0 var(--nav-indicator) inset;
+            color: var(--nav-indicator);
+            font-weight: 500;
         }
         
         .nav-link i {
@@ -168,7 +175,7 @@
         .card {
             background-color: white;
             border-radius: 12px;
-            padding: 24px;
+            padding: 28px;
             box-shadow: var(--card-shadow);
             margin-bottom: 1.5rem;
         }
@@ -197,7 +204,7 @@
         .btn-primary { background-color: var(--primary-blue); color: white; }
         .btn-primary:hover {
             background-color: var(--primary-blue-dark);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .btn-approve { background-color: var(--green); color: white; }
@@ -218,14 +225,13 @@
             border-radius: 8px;
             font-size: 1rem;
             font-family: 'Sarabun', sans-serif;
-            background-color: #f9fafb;
+            background-color: #fff;
             transition: border-color 0.2s, box-shadow 0.2s;
             width: 100%;
         }
         .form-group input:focus, .form-group textarea:focus {
             outline: none;
             border-color: var(--primary-blue);
-            background-color: white;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
         }
 
@@ -241,7 +247,7 @@
             border-bottom: 1px solid var(--input-border);
         }
         .custom-table thead th {
-            background-color: #eef2ff;
+            background-color: #f9fafb; /* gray-50 */
             font-weight: 700;
             color: var(--dark-blue);
             white-space: nowrap; 
@@ -265,7 +271,7 @@
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
+            gap: 1.5rem;
         }
         .summary-card { padding: 15px; display: flex; flex-direction: column; border-left: 4px solid; }
         .summary-card.pending { border-color: var(--orange); }
@@ -273,7 +279,7 @@
         .summary-card.approved { border-color: var(--green); }
         .summary-card.rejected { border-color: var(--red); }
         .summary-card .count { font-size: 1.8rem; font-weight: 700; line-height: 1; margin-bottom: 5px; }
-        .summary-card .title { font-size: 0.95rem; color: var(--gray-text); }
+        .summary-card .title { font-size: 1rem; color: var(--gray-text); }
         .summary-card .icon { font-size: 1.2rem; margin-bottom: 0.5rem; }
         .summary-card.pending .icon { color: var(--orange); }
         .summary-card.returned .icon { color: var(--yellow); }
@@ -342,7 +348,7 @@
         .approval-card-content { display: grid; grid-template-columns: auto 1fr; gap: 10px; font-size: 0.9rem; }
         .approval-card-content span { font-weight: 500; }
         .approval-card-content label { font-weight: 700; }
-
+        
         /* --- Modal for Details & Approval --- */
         .modal {
             display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
@@ -351,7 +357,7 @@
         }
         .modal-content {
             background-color: var(--gray-bg); margin: 2vh auto; padding: 0;
-            border: 1px solid #888; width: 90vw; max-width: 900px; border-radius: 12px;
+            border: none; width: 90vw; max-width: 900px; border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column;
             max-height: 96vh;
         }
@@ -778,6 +784,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="doc-pagination" class="pagination"></div>
             </div>
         </section>
 
@@ -789,7 +796,39 @@
                     <label for="logo-upload">อัปโหลดโลโก้บริษัท</label>
                     <input type="file" id="logo-upload" accept="image/png, image/jpeg">
                     <img id="logo-preview" src="https://placehold.co/200x100/f3f4f6/6b7280?text=Preview" alt="Logo Preview">
-                    <button id="save-logo-btn" class="btn btn-primary" style="margin-top: 1rem; width: fit-content;">บันทึกโลโก้</button>
+                    <button id="save-logo-btn" class="btn btn-primary" style="margin-top: 1rem; width: fit-content;"><i class="fa-solid fa-save"></i> บันทึกโลโก้</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1.5rem;">
+                <h2 class="section-header"><i class="fa-solid fa-fire" style="color: #f97316;"></i> การเชื่อมต่อ Firebase Realtime Database</h2>
+                <p style="color: var(--gray-text); margin-bottom: 1rem; font-size: 0.95rem;">
+                    ระบบบันทึกและอ่านข้อมูลจาก Firebase Realtime Database เพื่อความรวดเร็วสูงสุด และอัปเดตสถานะแบบ Real-time ทันที
+                </p>
+                <div class="form-group">
+                    <label for="firebase-db-url-input">Firebase Database URL:</label>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                        <input type="text" id="firebase-db-url-input" class="form-control" style="flex: 1; min-width: 280px; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;" placeholder="https://save-quotation-default-rtdb.asia-southeast1.firebasedatabase.app">
+                        <button id="save-firebase-url-btn" class="btn btn-secondary"><i class="fa-solid fa-check"></i> บันทึก URL</button>
+                        <button id="test-firebase-btn" class="btn btn-primary"><i class="fa-solid fa-bolt"></i> ทดสอบการเชื่อมต่อ</button>
+                    </div>
+                    <small id="firebase-connection-status" style="display: block; font-weight: 500; color: var(--green);"></small>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1.5rem;">
+                <h2 class="section-header"><i class="fa-solid fa-cloud-arrow-up" style="color: var(--primary-blue);"></i> ย้ายข้อมูลเดิมจาก Google Sheets สู่ Firebase</h2>
+                <p style="color: var(--gray-text); margin-bottom: 1rem; font-size: 0.95rem;">
+                    สามารถกดปุ่มด้านล่างเพื่อดึงข้อมูลใบเสนอราคาเดิม, รายชื่อผู้อนุมัติ, ลายเซ็นผู้ใช้งาน และโลโก้จาก Google Sheets เข้ามาเก็บใน Firebase Realtime Database โดยอัตโนมัติ (ทำเพียงครั้งเดียวตอนเริ่มต้น)
+                </p>
+                <button id="migrate-data-btn" class="btn btn-primary" style="width: fit-content;">
+                    <i class="fa-solid fa-file-import"></i> เริ่มโอนย้ายข้อมูลจาก Google Sheets สู่ Firebase
+                </button>
+                <div id="migration-status" style="margin-top: 1rem; display: none; padding: 1rem; border-radius: 8px; background: #f3f4f6; border: 1px solid #e5e7eb;">
+                    <div id="migration-progress-text" style="font-weight: 500; margin-bottom: 0.5rem; color: var(--dark-text);">กำลังประมวลผล...</div>
+                    <div style="width: 100%; background: #e5e7eb; border-radius: 4px; overflow: hidden; height: 10px;">
+                        <div id="migration-progress-bar" style="width: 0%; height: 100%; background: var(--primary-blue); transition: width 0.3s;"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -839,8 +878,404 @@
 
 
     <script>
-        // --- Config ---
+        // --- Configuration ---
+        // Google Apps Script URL (kept for migration & fallback)
         const API_URL = "https://script.google.com/macros/s/AKfycbwWo71tG1zgV35yxRTOFLHkX3DmbgDw7wnyaZ93cvU6jIzO4l_jWgAcWhXA9CkqIOc9/exec";
+
+        // Firebase Realtime Database Configuration
+        const DEFAULT_FIREBASE_DB_URL = "https://save-quotation-default-rtdb.asia-southeast1.firebasedatabase.app";
+        const FIREBASE_DB_URL = localStorage.getItem('app_firebase_db_url') || DEFAULT_FIREBASE_DB_URL;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYB1f-ONONvP5nVgHUF-kRCKAMJm7lLyc",
+            authDomain: "save-quotation.firebaseapp.com",
+            databaseURL: FIREBASE_DB_URL,
+            projectId: "save-quotation",
+            storageBucket: "save-quotation.firebasestorage.app",
+            messagingSenderId: "1010465699258",
+            appId: "1:1010465699258:web:b4453aaaf1a17e9de79983",
+            measurementId: "G-KC3BPM2DWW"
+        };
+
+        // Initialize Firebase SDK Compat
+        let db;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+        } catch (e) {
+            console.error("Firebase initialization error:", e);
+        }
+
+        // Helper to encode/decode keys for Firebase (., #, $, [, ], / are forbidden in keys)
+        function encodeKey(key) {
+            if (!key) return "";
+            return String(key).replace(/[\.#$\[\]\/]/g, '_');
+        }
+
+        function decodeKey(encodedKey) {
+            if (!encodedKey) return "";
+            return decodeURIComponent(encodedKey);
+        }
+
+        function encodeEmail(email) {
+            if (!email) return "";
+            return String(email).replace(/\./g, ',');
+        }
+
+        function decodeEmail(encodedEmail) {
+            if (!encodedEmail) return "";
+            return String(encodedEmail).replace(/,/g, '.');
+        }
+
+        // Intercept global fetch for Firebase URLs to use SDK under the hood (supports local file:///)
+        const originalFetch = window.fetch;
+        window.fetch = async function(url, options = {}) {
+            const urlStr = typeof url === 'string' ? url : (url.url || '');
+            if (urlStr.startsWith(FIREBASE_DB_URL)) {
+                let path = urlStr.substring(FIREBASE_DB_URL.length);
+                if (path.startsWith('/')) path = path.substring(1);
+                if (path.endsWith('.json')) path = path.substring(0, path.length - 5);
+
+                const method = (options.method || 'GET').toUpperCase();
+                const dbRef = db.ref(path);
+
+                let val = null;
+                if (method === 'GET') {
+                    const snapshot = await dbRef.once('value');
+                    val = snapshot.val();
+                } else if (method === 'PUT') {
+                    const body = JSON.parse(options.body);
+                    await dbRef.set(body);
+                    val = body;
+                } else if (method === 'PATCH') {
+                    const body = JSON.parse(options.body);
+                    await dbRef.update(body);
+                    const snapshot = await dbRef.once('value');
+                    val = snapshot.val();
+                } else if (method === 'DELETE') {
+                    await dbRef.remove();
+                    val = null;
+                }
+
+                return {
+                    ok: true,
+                    status: 200,
+                    statusText: 'OK',
+                    json: async () => val,
+                    text: async () => JSON.stringify(val),
+                    blob: async () => new Blob([JSON.stringify(val)]),
+                    headers: new Headers({ 'content-type': 'application/json' })
+                };
+            }
+            return originalFetch(url, options);
+        };
+
+        // --- Google Apps Script Caller (Fallback & Migration) ---
+        async function callGasApi(url, options = {}, retries = 2, delay = 1500) {
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                    const response = await originalFetch(url, options);
+                    const text = await response.text();
+                    const trimmed = text.trim();
+
+                    if (trimmed.startsWith('<') || trimmed.includes('<!DOCTYPE') || trimmed.includes('<html')) {
+                        if (attempt < retries) {
+                            console.warn(`[callGasApi] ได้รับหน้าเว็บ HTML แทน JSON (กำลังลองใหม่ ครั้งที่ ${attempt + 1}/${retries})...`);
+                            await new Promise(r => setTimeout(r, delay));
+                            continue;
+                        }
+                        throw new Error("เซิร์ฟเวอร์ Google Apps Script ไม่พร้อมใช้งานชั่วคราว");
+                    }
+
+                    if (!response.ok) {
+                        if (attempt < retries) {
+                            await new Promise(r => setTimeout(r, delay));
+                            continue;
+                        }
+                        throw new Error(`เซิร์ฟเวอร์ตอบกลับผิดพลาด (HTTP ${response.status})`);
+                    }
+
+                    return JSON.parse(text);
+                } catch (err) {
+                    if (attempt < retries) {
+                        await new Promise(r => setTimeout(r, delay));
+                        continue;
+                    }
+                    throw err;
+                }
+            }
+        }
+
+        // --- Firebase Direct Operations ---
+        async function handleFirebaseAction(action, params = {}, postData = null) {
+            if (!db) throw new Error("Firebase Realtime Database ยังไม่ได้ถูกเริ่มต้น");
+
+            switch (action) {
+                case 'getDocuments': {
+                    const snap = await db.ref('Documents').once('value');
+                    const docsVal = snap.val() || {};
+                    const allDocs = Object.values(docsVal).map(doc => ({
+                        docNumber: doc.docNumber || '',
+                        date: doc.date || (doc.createdAt ? new Date(doc.createdAt).toISOString() : new Date().toISOString()),
+                        requester: doc.requester || '',
+                        status: doc.status || 'pending',
+                        approverName: doc.approverName || '',
+                        rejectionReason: doc.rejectionReason || '',
+                        contactName: doc.contactName || '',
+                        companyName: doc.companyName || ''
+                    }));
+                    const pendingCount = allDocs.filter(d => d.status === 'pending').length;
+                    return { success: true, data: { all: allDocs, pendingCount } };
+                }
+
+                case 'getPendingQuotationDetails': {
+                    const snap = await db.ref('Documents').once('value');
+                    const docsVal = snap.val() || {};
+                    const pendingQuotations = Object.values(docsVal)
+                        .filter(doc => doc.status === 'pending')
+                        .map(doc => ({
+                            ...doc,
+                            items: doc.items || []
+                        }));
+                    return { success: true, data: pendingQuotations };
+                }
+
+                case 'getQuotationDetails': {
+                    const docNumber = params.docNumber;
+                    if (!docNumber) return { success: false, message: "Document number is required." };
+                    const cleanDocNumber = String(docNumber).replace(/'/g, '').trim();
+                    const snap = await db.ref(`Documents/${encodeKey(cleanDocNumber)}`).once('value');
+                    let doc = snap.val();
+                    if (!doc) {
+                        const allSnap = await db.ref('Documents').once('value');
+                        const allVal = allSnap.val() || {};
+                        doc = Object.values(allVal).find(d => String(d.docNumber).replace(/'/g, '').trim() === cleanDocNumber);
+                    }
+                    if (!doc) {
+                        return { success: false, message: `Quotation ${docNumber} not found.` };
+                    }
+                    if (!doc.items) doc.items = [];
+                    return { success: true, data: doc };
+                }
+
+                case 'generateDocNumber': {
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                    const prefix = `QT-${year}${month}-`;
+
+                    const snap = await db.ref('Documents').once('value');
+                    const docsVal = snap.val() || {};
+                    const docNumbers = Object.values(docsVal).map(d => String(d.docNumber || '').replace(/'/g, '').trim());
+
+                    const lastNumberInMonth = docNumbers
+                        .filter(num => num.startsWith(prefix))
+                        .map(num => {
+                            const parts = num.split('-');
+                            return parts.length >= 3 ? parseInt(parts[2], 10) : 0;
+                        })
+                        .filter(n => !isNaN(n))
+                        .reduce((max, current) => current > max ? current : max, 0);
+
+                    const newNumber = (lastNumberInMonth + 1).toString().padStart(3, '0');
+                    const newDocNumber = `${prefix}${newNumber}`;
+                    return { success: true, docNumber: newDocNumber };
+                }
+
+                case 'createQuotation': {
+                    const data = (postData && postData.data) ? postData.data : (postData || {});
+                    const docNum = String(data.docNumber).replace(/'/g, '').trim();
+                    const nowIso = new Date().toISOString();
+                    const quotationData = {
+                        docNumber: docNum,
+                        date: nowIso,
+                        requester: data.requester || '',
+                        status: 'pending',
+                        contactName: data.contactName || '',
+                        contactPhone: data.contactPhone ? String(data.contactPhone).replace(/'/g, '') : '',
+                        companyName: data.companyName || '',
+                        address: data.address || '',
+                        deliveryDate: data.deliveryDate ? new Date(data.deliveryDate).toISOString() : '',
+                        expiryDate: data.expiryDate ? new Date(data.expiryDate).toISOString() : '',
+                        creditDays: data.creditDays || 0,
+                        machineModel: data.machineModel || '',
+                        technician: data.technician || '',
+                        proposerPhone: data.proposerPhone ? String(data.proposerPhone).replace(/'/g, '') : '',
+                        grandTotal: data.grandTotal || '',
+                        signatureUrl: data.signature || '',
+                        approverName: '',
+                        approverSignatureUrl: '',
+                        rejectionReason: '',
+                        remarks: data.remarks || '',
+                        approvalDate: '',
+                        items: data.items || [],
+                        createdAt: nowIso,
+                        updatedAt: nowIso
+                    };
+                    await db.ref(`Documents/${encodeKey(docNum)}`).set(quotationData);
+                    return { success: true, message: "Quotation created successfully.", data: quotationData };
+                }
+
+                case 'updateQuotation': {
+                    const data = (postData && postData.data) ? postData.data : (postData || {});
+                    const docNum = String(data.docNumber).replace(/'/g, '').trim();
+                    const updatePayload = {
+                        requester: data.requester || '',
+                        status: 'pending',
+                        contactName: data.contactName || '',
+                        contactPhone: data.contactPhone ? String(data.contactPhone).replace(/'/g, '') : '',
+                        companyName: data.companyName || '',
+                        address: data.address || '',
+                        deliveryDate: data.deliveryDate ? new Date(data.deliveryDate).toISOString() : '',
+                        expiryDate: data.expiryDate ? new Date(data.expiryDate).toISOString() : '',
+                        creditDays: data.creditDays || 0,
+                        machineModel: data.machineModel || '',
+                        technician: data.technician || '',
+                        proposerPhone: data.proposerPhone ? String(data.proposerPhone).replace(/'/g, '') : '',
+                        grandTotal: data.grandTotal || '',
+                        remarks: data.remarks || '',
+                        items: data.items || [],
+                        approverName: '',
+                        approverSignatureUrl: '',
+                        rejectionReason: '',
+                        approvalDate: '',
+                        updatedAt: new Date().toISOString()
+                    };
+                    if (data.signature) {
+                        updatePayload.signatureUrl = data.signature;
+                    }
+                    await db.ref(`Documents/${encodeKey(docNum)}`).update(updatePayload);
+                    return { success: true, message: "Quotation updated successfully." };
+                }
+
+                case 'updateQuotationStatus': {
+                    const data = (postData && postData.data) ? postData.data : (postData || {});
+                    const docNum = String(data.docNumber).replace(/'/g, '').trim();
+                    const nowIso = new Date().toISOString();
+                    const statusUpdate = {
+                        status: data.status,
+                        updatedAt: nowIso
+                    };
+
+                    if (data.status === 'approved') {
+                        statusUpdate.approverName = data.approverName || '';
+                        statusUpdate.approverSignatureUrl = data.signature || '';
+                        statusUpdate.approvalDate = nowIso;
+                        statusUpdate.rejectionReason = '';
+                    } else {
+                        statusUpdate.approverName = data.approverName || '';
+                        statusUpdate.rejectionReason = data.reason || '';
+                        statusUpdate.approverSignatureUrl = '';
+                        statusUpdate.approvalDate = '';
+                    }
+                    await db.ref(`Documents/${encodeKey(docNum)}`).update(statusUpdate);
+                    return { success: true, message: `Status updated to ${data.status}` };
+                }
+
+                case 'getLogo': {
+                    const snap = await db.ref('Settings/logoUrl').once('value');
+                    return { success: true, url: snap.val() || '' };
+                }
+
+                case 'uploadLogo': {
+                    const logoData = (postData && postData.data) ? postData.data : (postData ? postData.logoData : '');
+                    await db.ref('Settings/logoUrl').set(logoData);
+                    return { success: true, url: logoData };
+                }
+
+                case 'getApprovers': {
+                    const snap = await db.ref('Approvers').once('value');
+                    const data = snap.val() || {};
+                    return { success: true, data: Object.values(data) };
+                }
+
+                case 'saveApproverSignature': {
+                    const data = (postData && postData.data) ? postData.data : (postData || {});
+                    const cleanEmail = (data.email || '').trim().toLowerCase();
+                    const approverRef = db.ref(`Approvers/${encodeKey(cleanEmail)}`);
+                    const updateObj = {
+                        email: cleanEmail,
+                        signatureUrl: data.signatureBase64 || ''
+                    };
+                    if (data.name) updateObj.name = data.name;
+                    await approverRef.update(updateObj);
+                    return { success: true, signatureUrl: data.signatureBase64 };
+                }
+
+                case 'getAllUsers': {
+                    const snap = await db.ref('Users').once('value');
+                    const data = snap.val() || {};
+                    return { success: true, data: Object.values(data) };
+                }
+
+                case 'getUserSignature': {
+                    const userIdentifier = params.userIdentifier || (postData && postData.userIdentifier);
+                    if (!userIdentifier) return { success: true, signature: null };
+                    const snap = await db.ref(`Users/${encodeKey(userIdentifier)}`).once('value');
+                    const val = snap.val();
+                    return { success: true, signature: val ? val.signatureUrl : null };
+                }
+
+                case 'saveUserSignature': {
+                    const data = (postData && postData.data) ? postData.data : (postData || {});
+                    const userIdentifier = data.userIdentifier;
+                    await db.ref(`Users/${encodeKey(userIdentifier)}`).set({
+                        userIdentifier: userIdentifier,
+                        signatureUrl: data.signatureBase64
+                    });
+                    return { success: true, signatureUrl: data.signatureBase64 };
+                }
+
+                default:
+                    throw new Error(`Unknown action: ${action}`);
+            }
+        }
+
+        // --- Centralized API Caller with Firebase RTDB routing ---
+        async function callApi(urlOrAction, options = {}, retries = 2, delay = 1500) {
+            let action = '';
+            const params = {};
+            let postData = null;
+
+            if (typeof urlOrAction === 'string' && urlOrAction.includes('?')) {
+                const queryString = urlOrAction.split('?')[1];
+                const searchParams = new URLSearchParams(queryString);
+                action = searchParams.get('action') || '';
+                searchParams.forEach((val, key) => {
+                    params[key] = val;
+                });
+            } else if (options && options.body) {
+                try {
+                    postData = JSON.parse(options.body);
+                    action = postData.action || '';
+                } catch (e) {
+                    console.error("Failed to parse POST body JSON:", e);
+                }
+            } else if (typeof urlOrAction === 'string' && !urlOrAction.startsWith('http')) {
+                action = urlOrAction;
+            }
+
+            if (action && typeof db !== 'undefined') {
+                try {
+                    return await handleFirebaseAction(action, params, postData);
+                } catch (firebaseErr) {
+                    console.error(`[Firebase] Error in action "${action}":`, firebaseErr);
+                    if (firebaseErr.message && firebaseErr.message.includes('PERMISSION_DENIED')) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Firebase Permission Denied',
+                            html: 'ไม่สามารถเข้าถึง Firebase Realtime Database ได้ เนื่องจากติด Rules สิทธิ์การเข้าถึง<br><br>กรุณาไปที่ Firebase Console &gt; Realtime Database &gt; Rules และเปลี่ยนเป็น:<br><pre style="text-align:left; background:#f3f4f6; padding:8px; border-radius:4px; font-size:12px;">{\n  "rules": {\n    ".read": true,\n    ".write": true\n  }\n}</pre>'
+                        });
+                        throw firebaseErr;
+                    }
+                    console.warn(`[callApi] Falling back to Google Apps Script for action ${action}`);
+                }
+            }
+
+            return await callGasApi(urlOrAction, options, retries, delay);
+        }
         
         window.onload = () => {
             // --- DOM Elements & Global Variables ---
@@ -895,10 +1330,12 @@
             let allDocuments = [];
             let allDocumentsForEdit = [];
             let currentPage = 1;
-            const rowsPerPage = 10;
+            const rowsPerPage = 10; // สำหรับหน้าแรก
+            let docCurrentPage = 1; // สำหรับหน้าคลังเอกสาร
+            const docRowsPerPage = 20; // สำหรับหน้าคลังเอกสาร
             let pendingQuotationsData = [];
             let processedDocuments = [];
-            let logoBase64 = '';
+            let currentFilteredDocs = []; // สำหรับเก็บผลลัพธ์การค้นหาในหน้าคลังเอกสาร
             let processedSignatureBase64 = '';
             let signatureMode = 'draw'; // 'draw', 'upload', or 'saved'
             let editingDocNumber = null;
@@ -1144,8 +1581,7 @@
                 }
                 
                 try {
-                    const response = await fetch(`${API_URL}?action=getDocuments`);
-                    const result = await response.json();
+                    const result = await callApi(`${API_URL}?action=getDocuments`);
                     if(result.success){
                         const statusOrder = { 'pending': 1, 'returned': 2 };
                         allDocuments = (result.data.all || []).sort((a, b) => {
@@ -1299,8 +1735,7 @@
                     });
                 }
                 try {
-                    const response = await fetch(`${API_URL}?action=getPendingQuotationDetails`);
-                    const result = await response.json();
+                    const result = await callApi(`${API_URL}?action=getPendingQuotationDetails`);
                     if(!result.success) throw new Error(result.message);
                     
                     pendingQuotationsData = result.data || [];
@@ -1756,11 +2191,10 @@
                          action: 'updateQuotationStatus',
                          data: { docNumber, status, ...data }
                      };
-                     const response = await fetch(API_URL, {
+                     const result = await callApi(API_URL, {
                          method: 'POST',
                          body: JSON.stringify(payload)
-                     });
-                     const result = await response.json();
+                     }, 1);
                      if (!result.success) throw new Error(result.message);
 
                      Swal.fire('สำเร็จ!', 'สถานะเอกสารถูกอัปเดตเรียบร้อยแล้ว', 'success').then(() => {
@@ -1785,8 +2219,7 @@
                 }
                 try {
                     // ดึงข้อมูลใหม่เสมอเพื่อป้องกัน Stale Cache
-                    const response = await fetch(`${API_URL}?action=getDocuments`);
-                    const result = await response.json();
+                    const result = await callApi(`${API_URL}?action=getDocuments`);
                     if(!result.success) throw new Error(result.message);
                     
                     // อัปเดตตัวแปร global เพื่อให้ badges และหน้าอื่นๆ ซิงค์ข้อมูลล่าสุด
@@ -1876,6 +2309,68 @@
                 }
             }
 
+            // --- Pagination สำหรับหน้าคลังเอกสาร ---
+            function setupDocPagination() {
+                const paginationContainer = document.getElementById('doc-pagination');
+                paginationContainer.innerHTML = '';
+                const pageCount = Math.ceil(currentFilteredDocs.length / docRowsPerPage);
+
+                if (pageCount <= 1) return;
+
+                const createBtn = (text, pageNum, disabled = false, isCurrent = false) => {
+                    const btn = document.createElement('button');
+                    btn.innerHTML = text;
+                    btn.disabled = disabled;
+                    if (isCurrent) btn.classList.add('active');
+                    if (!disabled && pageNum !== null) {
+                        btn.addEventListener('click', () => {
+                            docCurrentPage = pageNum;
+                            displayDocumentsTable(docCurrentPage);
+                            setupDocPagination(); // Re-render pagination to update active state
+                        });
+                    }
+                    return btn;
+                };
+
+                paginationContainer.appendChild(createBtn('&laquo; ก่อนหน้า', docCurrentPage - 1, docCurrentPage === 1));
+
+                let startPage = Math.max(1, docCurrentPage - 2);
+                let endPage = Math.min(pageCount, docCurrentPage + 2);
+
+                if (docCurrentPage <= 3) {
+                    endPage = Math.min(5, pageCount);
+                }
+                if (docCurrentPage >= pageCount - 2) {
+                    startPage = Math.max(1, pageCount - 4);
+                }
+
+                if (startPage > 1) {
+                    paginationContainer.appendChild(createBtn(1, 1));
+                    if (startPage > 2) {
+                        const dots = document.createElement('span');
+                        dots.className = 'dots';
+                        dots.innerHTML = '&hellip;';
+                        paginationContainer.appendChild(dots);
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationContainer.appendChild(createBtn(i, i, false, i === docCurrentPage));
+                }
+
+                if (endPage < pageCount) {
+                    if (endPage < pageCount - 1) {
+                        const dots = document.createElement('span');
+                        dots.className = 'dots';
+                        dots.innerHTML = '&hellip;';
+                        paginationContainer.appendChild(dots);
+                    }
+                    paginationContainer.appendChild(createBtn(pageCount, pageCount));
+                }
+
+                paginationContainer.appendChild(createBtn('ถัดไป &raquo;', docCurrentPage + 1, docCurrentPage === pageCount));
+            }
+
             // --- Documents Page Logic ---
             async function loadDocumentsPageData(showLoader = true) {
                 if (showLoader) {
@@ -1887,8 +2382,7 @@
                 }
                 try {
                     // ดึงข้อมูลใหม่เสมอเพื่อป้องกัน Stale Cache
-                    const response = await fetch(`${API_URL}?action=getDocuments`);
-                    const result = await response.json();
+                    const result = await callApi(`${API_URL}?action=getDocuments`);
                     if(!result.success) throw new Error(result.message);
                     
                     // อัปเดตตัวแปร global
@@ -1902,21 +2396,29 @@
                     // Reset search input เมื่อโหลดข้อมูลใหม่
                     const searchInput = document.getElementById('doc-search-input');
                     if (searchInput) searchInput.value = '';
-                    
-                    displayDocumentsTable(processedDocuments);
+
+                    currentFilteredDocs = [...processedDocuments]; // เก็บข้อมูลที่กรองแล้ว
+                    docCurrentPage = 1; // รีเซ็ตหน้าปัจจุบัน
+                    displayDocumentsTable(docCurrentPage);
+                    setupDocPagination();
                     if (showLoader) Swal.close();
                 } catch (error) {
                      Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดคลังเอกสารได้: ${error.message}`, 'error');
                 }
             }
             
-            function displayDocumentsTable(docs) {
+            function displayDocumentsTable(page) {
                 documentsTableBody.innerHTML = '';
-                 if (docs.length === 0) {
+                 if (currentFilteredDocs.length === 0) {
                     documentsTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">ไม่พบเอกสาร</td></tr>'; 
                     return;
                 }
-                docs.forEach(doc => {
+
+                const start = (page - 1) * docRowsPerPage;
+                const end = start + docRowsPerPage;
+                const paginatedItems = currentFilteredDocs.slice(start, end);
+
+                paginatedItems.forEach(doc => {
                     const row = document.createElement('tr');
                     let statusClass = '';
                     switch (doc.status) {
@@ -1959,6 +2461,11 @@
             }
 
             async function showPreview(docNumber) {
+                if (!docNumber || !String(docNumber).trim()) {
+                    Swal.fire('ไม่พบเลขที่เอกสาร', 'เอกสารนี้ไม่มีเลขที่เอกสาร (docNumber ว่างเปล่า) จึงไม่สามารถเปิดดูพรีวิวได้ กรุณาตรวจสอบหัวคอลัมน์ A1 ในชีต Quotations', 'warning');
+                    return;
+                }
+
                 Swal.fire({
                     title: 'กำลังสร้างพรีวิว...',
                     allowOutsideClick: false,
@@ -1966,8 +2473,7 @@
                 });
 
                 try {
-                    const response = await fetch(`${API_URL}?action=getQuotationDetails&docNumber=${docNumber}`);
-                    const result = await response.json();
+                    const result = await callApi(`${API_URL}?action=getQuotationDetails&docNumber=${docNumber}`);
                     if (!result.success) throw new Error(result.message);
                     
                     currentPreviewData = result.data; 
@@ -2088,6 +2594,7 @@
 
             // --- Settings Page Logic ---
             function handleLogoUpload(e) {
+                let logoBase64 = '';
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
@@ -2100,6 +2607,7 @@
             }
 
             async function saveLogo() {
+                let logoBase64 = document.getElementById('logo-preview').src;
                 if (!logoBase64) {
                     Swal.fire('ข้อผิดพลาด', 'กรุณาเลือกไฟล์โลโก้ก่อน', 'error');
                     return;
@@ -2111,14 +2619,15 @@
                 });
                 try {
                     const payload = { action: 'uploadLogo', data: logoBase64 };
-                    const response = await fetch(API_URL, {
+                    const result = await callApi(API_URL, {
                         method: 'POST',
                         body: JSON.stringify(payload)
-                    });
-                    const result = await response.json();
+                    }, 1);
 
                     if(result.success) {
                         navbarLogo.src = result.url;
+                        if (logoPreview) logoPreview.src = result.url;
+                        localStorage.setItem('app_cached_logo', result.url);
                         Swal.fire('สำเร็จ!', 'อัปโหลดโลโก้เรียบร้อย', 'success');
                     } else {
                         throw new Error(result.message);
@@ -2129,29 +2638,73 @@
             }
 
             async function loadLogo() {
-                let logoUrl = '';
-                    try {
-                        const response = await fetch(`${API_URL}?action=getLogo`);
-                        const result = await response.json();
-                        if(result.success && result.url){
-                            logoUrl = result.url;
+                // 1. นำโลโก้จากแคชมาแสดงผลทันทีก่อน ไม่ต้องรอเน็ต
+                const cachedLogo = localStorage.getItem('app_cached_logo');
+                if (cachedLogo) {
+                    if (navbarLogo) navbarLogo.src = cachedLogo;
+                    if (logoPreview) logoPreview.src = cachedLogo;
+                }
+
+                try {
+                    const result = await callApi(`${API_URL}?action=getLogo`, {}, 1);
+                    if (result && result.success && result.url) {
+                        const logoUrl = result.url;
+                        if (logoUrl !== cachedLogo) {
+                            localStorage.setItem('app_cached_logo', logoUrl);
+                            if (navbarLogo) navbarLogo.src = logoUrl;
+                            if (logoPreview) logoPreview.src = logoUrl;
                         }
-                    } catch(error){
-                        console.error("Could not fetch logo from server:", error);
                     }
-                 if(logoUrl){
-                    navbarLogo.src = logoUrl;
-                    logoPreview.src = logoUrl;
-                 }
+                } catch(error) {
+                    console.warn("Could not fetch latest logo from server:", error);
+                }
             }
 
             // --- Navigation Logic ---
+            let currentActivePageId = 'home';
+
             async function handleNavigation(hash) {
+                const targetId = hash ? hash.substring(1) : 'home';
+
+                // ตรวจสอบรหัสผ่านก่อนเข้าเมนูตั้งค่า
+                if (targetId === 'settings') {
+                    const { value: password } = await Swal.fire({
+                        title: 'ความปลอดภัยระบบ',
+                        text: 'กรุณากรอกรหัสผ่านเพื่อเข้าสู่เมนูตั้งค่าระบบ',
+                        input: 'password',
+                        inputPlaceholder: 'กรอกรหัสผ่าน',
+                        inputAttributes: {
+                            maxlength: '10',
+                            autocapitalize: 'off',
+                            autocorrect: 'off'
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fa-solid fa-lock-open"></i> ยืนยัน',
+                        cancelButtonText: 'ยกเลิก',
+                        confirmButtonColor: '#4f46e5',
+                        cancelButtonColor: '#6b7280',
+                        allowOutsideClick: false
+                    });
+
+                    if (password !== '0031') {
+                        if (password !== undefined && password !== null) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'รหัสผ่านไม่ถูกต้อง',
+                                text: 'คุณไม่มีสิทธิ์เข้าใช้งานเมนูตั้งค่าระบบ'
+                            });
+                        }
+                        const fallbackPage = (currentActivePageId && currentActivePageId !== 'settings') ? currentActivePageId : 'home';
+                        window.location.hash = `#${fallbackPage}`;
+                        return;
+                    }
+                }
+
+                currentActivePageId = targetId;
+
                 if (!hash.includes('create') && editingDocNumber) {
                    resetCreateFormState();
                 }
-
-                const targetId = hash ? hash.substring(1) : 'home';
                 
                 pages.forEach(page => page.classList.remove('active'));
                 const activePage = document.getElementById(targetId);
@@ -2162,8 +2715,14 @@
                 });
 
                 if (targetId === 'home') await loadHomePageData();
-                else if (targetId === 'create') initializeSignaturePad();
-                else if (targetId === 'approve') await checkApproverLogin();
+                else if (targetId === 'create') {
+                    initializeSignaturePad();
+                    if (Object.keys(allUsersSignatures).length === 0) loadAllUsersSignatures();
+                }
+                else if (targetId === 'approve') {
+                    if (approverEmails.length === 0) await loadApprovers();
+                    await checkApproverLogin();
+                }
                 else if (targetId === 'documents') await loadDocumentsPageData();
                 else if (targetId === 'edit') await loadEditPageData();
             }
@@ -2198,15 +2757,19 @@
             }
 
             async function populateFormForEdit(docNumber) {
+                if (!docNumber || !String(docNumber).trim()) {
+                    Swal.fire('ไม่พบเลขที่เอกสาร', 'เอกสารนี้ไม่มีเลขที่เอกสาร (docNumber ว่างเปล่า) จึงไม่สามารถเปิดแก้ไขได้ กรุณาตรวจสอบหัวคอลัมน์ A1 ในชีต Quotations', 'warning');
+                    return;
+                }
+
                  Swal.fire({
                     title: 'กำลังโหลดข้อมูลเพื่อแก้ไข...',
                     allowOutsideClick: false,
                     didOpen: () => Swal.showLoading()
                 });
                 try {
-                    const response = await fetch(`${API_URL}?action=getQuotationDetails&docNumber=${docNumber}`);
-                    const result = await response.json();
-                     if (!result.success) throw new Error(result.message);
+                    const result = await callApi(`${API_URL}?action=getQuotationDetails&docNumber=${docNumber}`);
+                    if (!result.success) throw new Error(result.message);
                     
                     const data = result.data;
                     
@@ -2425,21 +2988,19 @@
                         docNumber = editingDocNumber;
                         data.docNumber = docNumber;
                     } else {
-                         const numResponse = await fetch(API_URL, {
+                        const numResult = await callApi(API_URL, {
                             method: 'POST',
                             body: JSON.stringify({ action: 'generateDocNumber' })
-                        });
-                        const numResult = await numResponse.json();
+                        }, 1);
                         if (!numResult.success) throw new Error(numResult.message);
                         docNumber = numResult.docNumber;
                         data.docNumber = docNumber;
                     }
 
-                    const response = await fetch(API_URL, {
+                    const result = await callApi(API_URL, {
                         method: 'POST',
                         body: JSON.stringify({ action: action, data: data })
-                    });
-                    const result = await response.json();
+                    }, 1);
 
                     if (result.success) {
                         
@@ -2468,10 +3029,9 @@
             // --- ฟังก์ชันดึงข้อมูลผู้อนุมัติจาก Sheet ---
             function loadApprovers() {
                 // เรียกใช้พื้นหลัง ไม่แสดงผลข้อผิดพลาดให้รกหูรกตา
-                fetch(`${API_URL}?action=getApprovers`)
-                    .then(response => response.json())
+                return callApi(`${API_URL}?action=getApprovers`, {}, 2)
                     .then(result => {
-                        if (result.success && result.data) {
+                        if (result && result.success && result.data) {
                             approverMapping = {};
                             approverEmails = [];
                             result.data.forEach(appr => {
@@ -2493,7 +3053,7 @@
                             });
                         }
                     })
-                    .catch(e => console.error("Failed to load approvers:", e));
+                    .catch(e => console.warn("Failed to load approvers:", e));
             }
 
             // --- ฟังก์ชันบันทึกลายเซ็นผู้อนุมัติลง Sheet Approvers ---
@@ -2504,12 +3064,11 @@
                          action: 'saveApproverSignature',
                          data: { email, signatureBase64, name }
                      };
-                     const response = await fetch(API_URL, {
+                     const result = await callApi(API_URL, {
                          method: 'POST',
                          body: JSON.stringify(payload)
-                     });
-                     const result = await response.json();
-                     if (result.success) {
+                     }, 1);
+                     if (result && result.success) {
                          console.log("Approver signature saved to sheet.");
                          const cleanEmail = email.trim().toLowerCase();
                          allUsersSignatures[cleanEmail] = result.signatureUrl; 
@@ -2525,10 +3084,9 @@
 
             // --- ฟังก์ชันสำหรับดึงและบันทึกลายเซ็นผู้ใช้งานทั่วไป ---
             function loadAllUsersSignatures() {
-                fetch(`${API_URL}?action=getAllUsers`)
-                    .then(response => response.json())
+                return callApi(`${API_URL}?action=getAllUsers`, {}, 2)
                     .then(result => {
-                        if (result.success && result.data) {
+                        if (result && result.success && result.data) {
                             result.data.forEach(user => {
                                 if(user.userIdentifier && user.signatureUrl) {
                                     allUsersSignatures[user.userIdentifier] = user.signatureUrl;
@@ -2536,7 +3094,7 @@
                             });
                         }
                     })
-                    .catch(e => console.error("Failed to preload user signatures:", e));
+                    .catch(e => console.warn("Failed to preload user signatures:", e));
             }
 
             async function fetchUserSignature(userIdentifier) {
@@ -2580,12 +3138,11 @@
                          action: 'saveUserSignature',
                          data: { userIdentifier, signatureBase64 }
                      };
-                     const response = await fetch(API_URL, {
+                     const result = await callApi(API_URL, {
                          method: 'POST',
                          body: JSON.stringify(payload)
-                     });
-                     const result = await response.json();
-                     if (result.success) {
+                     }, 1);
+                     if (result && result.success) {
                          allUsersSignatures[userIdentifier] = result.signatureUrl; 
                          return result;
                      } 
@@ -2662,11 +3219,9 @@
             document.getElementById('doc-search-input').addEventListener('input', (e) => {
                 const searchTerm = e.target.value.trim().toLowerCase();
                 // ถ้า search ว่างเปล่า แสดงทั้งหมด
-                if (!searchTerm) {
-                    displayDocumentsTable(processedDocuments);
-                    return;
-                }
-                const filtered = processedDocuments.filter(doc => {
+                currentFilteredDocs = processedDocuments.filter(doc => {
+                    if (!searchTerm) return true; // ถ้าไม่มีคำค้นหา ให้แสดงทั้งหมด
+
                     try {
                         const docNumber = doc.docNumber ? String(doc.docNumber).toLowerCase() : '';
                         const requester = doc.requester ? String(doc.requester).toLowerCase() : '';
@@ -2682,8 +3237,11 @@
                         return false;
                     }
                 });
-                displayDocumentsTable(filtered);
+                docCurrentPage = 1; // รีเซ็ตไปหน้า 1 เสมอเมื่อค้นหาใหม่
+                displayDocumentsTable(docCurrentPage);
+                setupDocPagination();
             });
+
             editSearchInput.addEventListener('input', filterDocuments);
             
             logoUpload.addEventListener('change', handleLogoUpload);
@@ -2752,15 +3310,295 @@
             });
             signatureUploadInput.addEventListener('change', (e) => handleSignatureUpload(e, false));
 
+            // --- Firebase Settings & Migration Management ---
+            const firebaseDbUrlInput = document.getElementById('firebase-db-url-input');
+            const saveFirebaseUrlBtn = document.getElementById('save-firebase-url-btn');
+            const testFirebaseBtn = document.getElementById('test-firebase-btn');
+            const firebaseStatusEl = document.getElementById('firebase-connection-status');
+            const migrateDataBtn = document.getElementById('migrate-data-btn');
+
+            if (firebaseDbUrlInput) {
+                firebaseDbUrlInput.value = FIREBASE_DB_URL;
+            }
+
+            if (saveFirebaseUrlBtn) {
+                saveFirebaseUrlBtn.addEventListener('click', () => {
+                    const newUrl = (firebaseDbUrlInput.value || '').trim();
+                    if (!newUrl) {
+                        Swal.fire('คำเตือน', 'กรุณาระบุ URL ของ Firebase Realtime Database', 'warning');
+                        return;
+                    }
+                    localStorage.setItem('app_firebase_db_url', newUrl);
+                    Swal.fire('บันทึกสำเร็จ', 'บันทึก URL เรียบร้อยแล้ว หน้าเว็บจะรีโหลดใหม่เพื่อเชื่อมต่อฐานข้อมูลใหม่', 'success').then(() => {
+                        window.location.reload();
+                    });
+                });
+            }
+
+            if (testFirebaseBtn) {
+                testFirebaseBtn.addEventListener('click', async () => {
+                    if (!db) {
+                        Swal.fire('ข้อผิดพลาด', 'Firebase ยังไม่ได้ถูกเริ่มต้น', 'error');
+                        return;
+                    }
+                    Swal.fire({
+                        title: 'กำลังทดสอบการเชื่อมต่อ...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                    try {
+                        const snap = await db.ref('Documents').limitToFirst(1).once('value');
+                        Swal.fire('เชื่อมต่อสำเร็จ!', 'สามารถอ่านและเขียนข้อมูลกับ Firebase Realtime Database ได้ปกติ', 'success');
+                        if (firebaseStatusEl) {
+                            firebaseStatusEl.textContent = 'สถานะ: เชื่อมต่อสำเร็จ (ออนไลน์)';
+                            firebaseStatusEl.style.color = 'var(--green)';
+                        }
+                    } catch (err) {
+                        console.error("Test connection error:", err);
+                        Swal.fire('การเชื่อมต่อล้มเหลว', `ไม่สามารถเชื่อมต่อได้: ${err.message}<br><br>หากติด Permission Denied กรุณาตั้งค่า Rules ใน Firebase Console ให้เปิด .read: true และ .write: true`, 'error');
+                        if (firebaseStatusEl) {
+                            firebaseStatusEl.textContent = `สถานะ: เกิดข้อผิดพลาด (${err.message})`;
+                            firebaseStatusEl.style.color = 'var(--red)';
+                        }
+                    }
+                });
+            }
+
+            if (migrateDataBtn) {
+                migrateDataBtn.addEventListener('click', migrateDataFromGoogleSheets);
+            }
+
+            async function migrateDataFromGoogleSheets() {
+                const confirm = await Swal.fire({
+                    title: 'ยืนยันการโอนย้ายข้อมูล?',
+                    html: `ระบบจะดึงข้อมูลใบเสนอราคา, รายชื่อผู้อนุมัติ, ลายเซ็น และโลโก้จาก Google Sheets เดิมเข้ามายัง Firebase Realtime Database<br><br><small style="color:var(--gray-text)">แนะนำให้ทำเพียงครั้งเดียวเมื่อเริ่มต้นใช้งาน Firebase</small>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4f46e5',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'เริ่มโอนย้ายข้อมูล',
+                    cancelButtonText: 'ยกเลิก'
+                });
+
+                if (!confirm.isConfirmed) return;
+
+                const migrationStatus = document.getElementById('migration-status');
+                const progressText = document.getElementById('migration-progress-text');
+                const progressBar = document.getElementById('migration-progress-bar');
+                if (migrationStatus) migrationStatus.style.display = 'block';
+
+                function setProgress(pct, msg) {
+                    if (progressText) progressText.textContent = msg;
+                    if (progressBar) progressBar.style.width = `${pct}%`;
+                }
+
+                try {
+                    setProgress(10, 'กำลังโหลดโลโก้บริษัทจาก Google Sheets...');
+                    try {
+                        const logoRes = await callGasApi(`${API_URL}?action=getLogo`, {}, 2);
+                        if (logoRes && logoRes.success && logoRes.url) {
+                            await db.ref('Settings/logoUrl').set(logoRes.url);
+                        }
+                    } catch(e) { console.warn("Logo migration warning:", e); }
+
+                    setProgress(25, 'กำลังโหลดรายชื่อผู้อนุมัติจาก Google Sheets...');
+                    try {
+                        const apprRes = await callGasApi(`${API_URL}?action=getApprovers`, {}, 2);
+                        if (apprRes && apprRes.success && Array.isArray(apprRes.data)) {
+                            const approversObj = {};
+                            apprRes.data.forEach(a => {
+                                if (a.email) {
+                                    const cleanEmail = a.email.trim().toLowerCase();
+                                    approversObj[encodeKey(cleanEmail)] = {
+                                        email: cleanEmail,
+                                        name: a.name || '',
+                                        signatureUrl: a.signatureUrl || ''
+                                    };
+                                }
+                            });
+                            if (Object.keys(approversObj).length > 0) {
+                                await db.ref('Approvers').update(approversObj);
+                            }
+                        }
+                    } catch(e) { console.warn("Approvers migration warning:", e); }
+
+                    setProgress(40, 'กำลังโหลดลายเซ็นผู้ใช้จาก Google Sheets...');
+                    try {
+                        const usersRes = await callGasApi(`${API_URL}?action=getAllUsers`, {}, 2);
+                        if (usersRes && usersRes.success && Array.isArray(usersRes.data)) {
+                            const usersObj = {};
+                            usersRes.data.forEach(u => {
+                                if (u.userIdentifier) {
+                                    usersObj[encodeKey(u.userIdentifier)] = {
+                                        userIdentifier: u.userIdentifier,
+                                        signatureUrl: u.signatureUrl || ''
+                                    };
+                                }
+                            });
+                            if (Object.keys(usersObj).length > 0) {
+                                await db.ref('Users').update(usersObj);
+                            }
+                        }
+                    } catch(e) { console.warn("Users migration warning:", e); }
+
+                    setProgress(50, 'กำลังโหลดรายการใบเสนอราคาจาก Google Sheets...');
+                    
+                    let allDocsList = [];
+                    let fullLoaded = false;
+                    try {
+                        const fullRes = await callGasApi(`${API_URL}?action=getAllQuotationsFull`, {}, 1);
+                        if (fullRes && fullRes.success && Array.isArray(fullRes.data)) {
+                            allDocsList = fullRes.data;
+                            fullLoaded = true;
+                        }
+                    } catch(e) {
+                        console.warn("Full migration endpoint not yet deployed in GAS, using standard endpoints:", e);
+                    }
+
+                    let itemsMap = {};
+                    if (!fullLoaded) {
+                        try {
+                            const pendingRes = await callGasApi(`${API_URL}?action=getPendingQuotationDetails`, {}, 2);
+                            if (pendingRes && pendingRes.success && Array.isArray(pendingRes.data)) {
+                                pendingRes.data.forEach(d => {
+                                    if (d.docNumber) {
+                                        itemsMap[String(d.docNumber).replace(/'/g, '').trim()] = d.items || [];
+                                    }
+                                });
+                            }
+                        } catch(e) { console.warn("Pending items migration warning:", e); }
+
+                        const docsRes = await callGasApi(`${API_URL}?action=getDocuments`, {}, 2);
+                        if (!docsRes || !docsRes.success || !docsRes.data) {
+                            throw new Error(docsRes ? docsRes.message : "ไม่สามารถดึงข้อมูลเอกสารจาก Google Sheets ได้");
+                        }
+                        allDocsList = docsRes.data.all || [];
+                    }
+
+                    const total = allDocsList.length;
+                    setProgress(65, `ดึงข้อมูลได้ ${total} รายการ กำลังนำเข้าสู่ Firebase...`);
+
+                    const chunkSize = 100;
+                    for (let i = 0; i < total; i += chunkSize) {
+                        const chunk = allDocsList.slice(i, i + chunkSize);
+                        const batchObj = {};
+                        chunk.forEach(doc => {
+                            const docNum = String(doc.docNumber).replace(/'/g, '').trim();
+                            if (!docNum) return;
+                            batchObj[encodeKey(docNum)] = {
+                                docNumber: docNum,
+                                date: doc.date ? new Date(doc.date).toISOString() : new Date().toISOString(),
+                                requester: doc.requester || '',
+                                status: doc.status || 'pending',
+                                contactName: doc.contactName || '',
+                                contactPhone: doc.contactPhone || '',
+                                companyName: doc.companyName || '',
+                                address: doc.address || '',
+                                deliveryDate: doc.deliveryDate || '',
+                                expiryDate: doc.expiryDate || '',
+                                creditDays: doc.creditDays || 0,
+                                machineModel: doc.machineModel || '',
+                                technician: doc.technician || '',
+                                proposerPhone: doc.proposerPhone || '',
+                                grandTotal: doc.grandTotal || '',
+                                signatureUrl: doc.signatureUrl || '',
+                                approverName: doc.approverName || '',
+                                approverSignatureUrl: doc.approverSignatureUrl || '',
+                                rejectionReason: doc.rejectionReason || '',
+                                remarks: doc.remarks || '',
+                                approvalDate: doc.approvalDate || '',
+                                items: doc.items || itemsMap[docNum] || [],
+                                createdAt: doc.date ? new Date(doc.date).toISOString() : new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            };
+                        });
+                        await db.ref('Documents').update(batchObj);
+                        const pct = 65 + Math.round(((i + chunk.length) / total) * 33);
+                        setProgress(pct, `นำเข้าสำเร็จแล้ว ${Math.min(i + chunkSize, total)}/${total} รายการ...`);
+                    }
+
+                    setProgress(100, `โอนย้ายข้อมูลสำเร็จทั้งหมด ${total} รายการ เรียบร้อยแล้ว!`);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'โอนย้ายข้อมูลสำเร็จ!',
+                        text: `นำเข้าข้อมูลทั้งหมด ${total} รายการสู่ Firebase เรียบร้อยแล้ว ระบบพร้อมใช้งานด้วยความเร็วสูง`
+                    }).then(() => {
+                        loadHomePageData();
+                        loadLogo();
+                        loadApprovers();
+                        loadAllUsersSignatures();
+                    });
+                } catch (err) {
+                    console.error("Migration error:", err);
+                    Swal.fire('การโอนย้ายข้อมูลไม่สมบูรณ์', `เกิดข้อผิดพลาด: ${err.message}`, 'error');
+                    if (progressText) progressText.textContent = `เกิดข้อผิดพลาด: ${err.message}`;
+                }
+            }
+
+            // --- Realtime Listeners ---
+            function startRealtimeListeners() {
+                if (!db) return;
+                try {
+                    db.ref('Documents').on('value', (snapshot) => {
+                        const docsVal = snapshot.val() || {};
+                        const docs = Object.values(docsVal);
+                        updateAllBadges(docs);
+
+                        const pendingCount = docs.filter(d => d.status === 'pending').length;
+                        const returnedCount = docs.filter(d => d.status === 'returned').length;
+                        const approvedCount = docs.filter(d => d.status === 'approved').length;
+                        const rejectedCount = docs.filter(d => d.status === 'rejected').length;
+
+                        const pEl = document.getElementById('pending-count');
+                        if (pEl) pEl.textContent = pendingCount;
+                        const rEl = document.getElementById('returned-count-home');
+                        if (rEl) rEl.textContent = returnedCount;
+                        const aEl = document.getElementById('approved-count');
+                        if (aEl) aEl.textContent = approvedCount;
+                        const rjEl = document.getElementById('rejected-count');
+                        if (rjEl) rjEl.textContent = rejectedCount;
+                    });
+
+                    db.ref('Settings/logoUrl').on('value', (snapshot) => {
+                        const url = snapshot.val();
+                        if (url) {
+                            localStorage.setItem('app_cached_logo', url);
+                            if (navbarLogo) navbarLogo.src = url;
+                            if (logoPreview) logoPreview.src = url;
+                        }
+                    });
+                } catch(e) {
+                    console.warn("Could not start Firebase realtime listeners:", e);
+                }
+            }
+
             // --- Initial Load Logic ---
             function initApp() {
-                // 1. นำผู้ใช้เข้าสู่หน้าเว็บตาม URL ทันที
+                // 1. นำโลโก้จากแคชมาแสดงผลทันที ไม่ต้องรอเชื่อมต่อเครือข่าย
+                const cachedLogo = localStorage.getItem('app_cached_logo');
+                if (cachedLogo) {
+                    if (navbarLogo) navbarLogo.src = cachedLogo;
+                    if (logoPreview) logoPreview.src = cachedLogo;
+                }
+
+                // 2. นำผู้ใช้เข้าสู่หน้าเว็บตาม URL ทันที
                 handleNavigation(window.location.hash || '#home'); 
+
+                // 3. เริ่มต้น Realtime Listener
+                startRealtimeListeners();
                 
-                // 2. โหลดข้อมูลอื่นๆ ไว้เบื้องหลัง (Background Fetch) แบบเงียบๆ
-                loadLogo();
-                loadApprovers();
-                loadAllUsersSignatures();
+                // 4. โหลดข้อมูลโลโก้, ผู้อนุมัติ, ลายเซ็นผู้ใช้งาน
+                setTimeout(() => {
+                    loadLogo();
+                }, 200);
+
+                setTimeout(() => {
+                    loadApprovers();
+                }, 500);
+
+                setTimeout(() => {
+                    loadAllUsersSignatures();
+                }, 800);
             }
 
             // เริ่มการทำงาน
