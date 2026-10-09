@@ -2616,10 +2616,7 @@
                         <td>${escapeHTML(doc.companyName || '')}</td> 
                         <td><span class="status-badge ${statusClass}">${getStatusText(doc.status)}</span></td>
                         <td>
-                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                <button class="btn btn-secondary preview-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-eye"></i> พรีวิว</button>
-                                <button class="btn btn-primary edit-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-pen"></i> แก้ไข</button>
-                            </div>
+                            <button class="btn btn-secondary preview-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-eye"></i> พรีวิว</button>
                         </td>
                     `;
                     documentsTableBody.appendChild(row);
@@ -3483,9 +3480,6 @@
                 if (e.target.closest('.preview-btn')) {
                     const docNumber = e.target.closest('.preview-btn').dataset.docNumber;
                     showPreview(docNumber);
-                } else if (e.target.closest('.edit-btn')) {
-                    const docNumber = e.target.closest('.edit-btn').dataset.docNumber;
-                    requestEditDocument(docNumber);
                 }
             });
             
