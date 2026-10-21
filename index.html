@@ -1907,6 +1907,23 @@
                             const cleanDocNumber = doc.docNumber.toString().replace(/'/g, '');
                             card.dataset.docNumber = escapeHTML(cleanDocNumber);
                             // Fix 7: ป้องกัน XSS ใน Approval Cards
+                            const cardGrandTotal = (doc.items && doc.items.length > 0) ? (() => {
+                                const net = doc.items.reduce((acc, it) => {
+                                    if (it.netPrice !== undefined && it.netPrice !== null && it.netPrice !== '') {
+                                        return acc + (parseFloat(it.netPrice.toString().replace(/[^0-9.-]+/g, "")) || 0);
+                                    }
+                                    const q = parseFloat(it.quantity || 0);
+                                    const p = parseFloat(it.unitPrice || 0);
+                                    const d = parseFloat(it.discount || 0);
+                                    const tb = Math.round((q * p) * 100) / 100;
+                                    const da = Math.round((tb * (d / 100)) * 100) / 100;
+                                    return acc + Math.round((tb - da) * 100) / 100;
+                                }, 0);
+                                const rNet = Math.round(net * 100) / 100;
+                                const vat = Math.round((rNet * 0.07) * 100) / 100;
+                                return `${formatCurrency(Math.round((rNet + vat) * 100) / 100)} บาท`;
+                            })() : (doc.grandTotal || '');
+
                             card.innerHTML = `
                                 <div class="approval-card-header">
                                     <strong>เลขที่: ${escapeHTML(cleanDocNumber)}</strong>
@@ -1914,7 +1931,7 @@
                                 <div class="approval-card-content">
                                     <label>วันที่:</label> <span>${escapeHTML(formatDate(doc.date))}</span>
                                     <label>ผู้ขอ:</label> <span>${escapeHTML(doc.requester)}</span>
-                                    <label>ราคาสุทธิ:</label> <span style="font-weight: bold; color: var(--primary-blue-dark);">${escapeHTML(doc.grandTotal)}</span>
+                                    <label>ราคาสุทธิ:</label> <span style="font-weight: bold; color: var(--primary-blue-dark);">${escapeHTML(cardGrandTotal)}</span>
                                 </div>
                             `;
                             card.addEventListener('click', () => showApprovalDetails(cleanDocNumber));
@@ -1970,13 +1987,30 @@
                 }
 
                 // ส่วนคำนวณยอดรวม ใช้ data.items ทั้งหมดเสมอเพื่อให้ยอดเป๊ะ
-                const subtotal = (data.items || []).reduce((acc, item) => acc + (parseFloat(item.quantity || 0) * parseFloat(item.unitPrice || 0)), 0);
-                const netTotal = (data.items || []).reduce((acc, item) => {
-                    const netStr = item.netPrice ? item.netPrice.toString() : '0';
-                    return acc + (parseFloat(netStr.replace(/[^0-9.-]+/g, "")) || 0);
+                let subtotal = (data.items || []).reduce((acc, item) => {
+                    const qty = parseFloat(item.quantity || 0);
+                    const price = parseFloat(item.unitPrice || 0);
+                    return acc + Math.round((qty * price) * 100) / 100;
                 }, 0);
-                const totalDiscount = subtotal - netTotal;
-                const vatAmount = netTotal * 0.07;
+                subtotal = Math.round(subtotal * 100) / 100;
+
+                let netTotal = (data.items || []).reduce((acc, item) => {
+                    if (item.netPrice !== undefined && item.netPrice !== null && item.netPrice !== '') {
+                        const netStr = item.netPrice.toString().replace(/[^0-9.-]+/g, "");
+                        return acc + (parseFloat(netStr) || 0);
+                    }
+                    const qty = parseFloat(item.quantity || 0);
+                    const price = parseFloat(item.unitPrice || 0);
+                    const discount = parseFloat(item.discount || 0);
+                    const totalBefore = Math.round((qty * price) * 100) / 100;
+                    const discAmt = Math.round((totalBefore * (discount / 100)) * 100) / 100;
+                    return acc + Math.round((totalBefore - discAmt) * 100) / 100;
+                }, 0);
+                netTotal = Math.round(netTotal * 100) / 100;
+
+                const totalDiscount = Math.round((subtotal - netTotal) * 100) / 100;
+                const vatAmount = Math.round((netTotal * 0.07) * 100) / 100;
+                const calculatedGrandTotal = Math.round((netTotal + vatAmount) * 100) / 100;
 
                 // --- HTML Part 1 ---
                 const part1_Html = `
@@ -2060,7 +2094,7 @@
                                     <hr style="margin: 4px 0; border: 0; border-top: 1px solid #ccc;">
                                     <div class="summary-total">
                                         <span>ราคารวมทั้งสิ้น (บาท)</span>
-                                        <span>${data.grandTotal}</span>
+                                        <span>${(data.items && data.items.length > 0) ? `${formatCurrency(calculatedGrandTotal)} บาท` : (data.grandTotal || `${formatCurrency(calculatedGrandTotal)} บาท`)}</span>
                                      </div>
                                 </div>
                             </div>
@@ -3142,9 +3176,9 @@
                     const price = parseFloat(row.querySelector('[name="itemPrice"]').value) || 0;
                     const discount = parseFloat(row.querySelector('[name="itemDiscount"]').value) || 0;
                     
-                    const totalBeforeDiscount = qty * price;
-                    const discountAmount = totalBeforeDiscount * (discount / 100);
-                    const finalPrice = totalBeforeDiscount - discountAmount;
+                    const totalBeforeDiscount = Math.round((qty * price) * 100) / 100;
+                    const discountAmount = Math.round((totalBeforeDiscount * (discount / 100)) * 100) / 100;
+                    const finalPrice = Math.round((totalBeforeDiscount - discountAmount) * 100) / 100;
                     
                     row.querySelector('[name="itemNetPrice"]').value = formatCurrency(finalPrice);
                     
@@ -3152,9 +3186,11 @@
                     netTotal += finalPrice;
                 });
 
-                const totalDiscount = subtotal - netTotal;
-                const vat = netTotal * 0.07;
-                const grandTotal = netTotal + vat;
+                subtotal = Math.round(subtotal * 100) / 100;
+                netTotal = Math.round(netTotal * 100) / 100;
+                const totalDiscount = Math.round((subtotal - netTotal) * 100) / 100;
+                const vat = Math.round((netTotal * 0.07) * 100) / 100;
+                const grandTotal = Math.round((netTotal + vat) * 100) / 100;
 
                 document.getElementById('subtotal').textContent = `${formatCurrency(subtotal)} บาท`;
                 document.getElementById('total-discount').textContent = `${formatCurrency(totalDiscount)} บาท`;
