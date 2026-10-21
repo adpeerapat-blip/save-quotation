@@ -736,26 +736,6 @@
                     </table>
                 </div>
             </div>
-             <div class="card">
-                 <h2 class="section-header">รายการที่อนุมัติแล้ว (สามารถแก้ไขเพื่อส่งอนุมัติใหม่)</h2>
-                <div class="table-wrapper">
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th>วันที่</th>
-                                <th>เลขที่เอกสาร</th>
-                                <th>ผู้ขออนุมัติ</th>
-                                <th>ผู้อนุมัติ</th>
-                                <th>สถานะ</th>
-                                <th>ดำเนินการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="edit-approved-table-body">
-                            <!-- Approved list for edit will be here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </section>
 
         <!-- Page: Approve Quotation -->
@@ -821,37 +801,6 @@
             </div>
 
             <div class="card" style="margin-top: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
-                    <div>
-                        <h2 class="section-header" style="margin-bottom: 0.25rem;"><i class="fa-solid fa-user-shield" style="color: var(--primary-blue);"></i> จัดการรายชื่อผู้มีสิทธิ์อนุมัติ</h2>
-                        <p style="color: var(--gray-text); font-size: 0.95rem; margin-bottom: 0;">
-                            กำหนดรายชื่อและอีเมลสำหรับเข้าสู่ระบบอนุมัติใบเสนอราคา (เฉพาะอีเมลในรายการนี้เท่านั้นที่จะมีสิทธิ์อนุมัติ)
-                        </p>
-                    </div>
-                    <button id="add-approver-btn" class="btn btn-primary" style="white-space: nowrap;">
-                        <i class="fa-solid fa-user-plus"></i> เพิ่มผู้มีสิทธิ์อนุมัติ
-                    </button>
-                </div>
-
-                <div class="table-wrapper">
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px; text-align: center;">ลำดับ</th>
-                                <th>อีเมล (Google Account)</th>
-                                <th>ชื่อ-นามสกุล ผู้อนุมัติ</th>
-                                <th style="text-align: center; width: 140px;">ลายเซ็น</th>
-                                <th style="width: 140px; text-align: center;">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="approvers-table-body">
-                            <!-- Approvers will be rendered here by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card" style="margin-top: 1.5rem;">
                 <h2 class="section-header"><i class="fa-solid fa-fire" style="color: #f97316;"></i> การเชื่อมต่อ Firebase Realtime Database</h2>
                 <p style="color: var(--gray-text); margin-bottom: 1rem; font-size: 0.95rem;">
                     ระบบบันทึกและอ่านข้อมูลจาก Firebase Realtime Database เพื่อความรวดเร็วสูงสุด และอัปเดตสถานะแบบ Real-time ทันที
@@ -879,21 +828,6 @@
                     <div id="migration-progress-text" style="font-weight: 500; margin-bottom: 0.5rem; color: var(--dark-text);">กำลังประมวลผล...</div>
                     <div style="width: 100%; background: #e5e7eb; border-radius: 4px; overflow: hidden; height: 10px;">
                         <div id="migration-progress-bar" style="width: 0%; height: 100%; background: var(--primary-blue); transition: width 0.3s;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card" style="margin-top: 1.5rem;">
-                <h2 class="section-header"><i class="fa-solid fa-cloud-arrow-down" style="color: var(--green);"></i> ส่งข้อมูลจาก Firebase สู่ Google Sheets (สำรองข้อมูล)</h2>
-                <p style="color: var(--gray-text); margin-bottom: 1rem; font-size: 0.95rem;">
-                    ส่งข้อมูลใบเสนอราคา, รายการสินค้า, ผู้มีสิทธิ์อนุมัติ และลายเซ็นทั้งหมดจาก Firebase กลับไปยัง Google Sheets เพื่อให้ข้อมูลในชีตเป็นปัจจุบันเสมอ หรือใช้สำหรับสำรองข้อมูล (Backup)
-                </p>
-                <button id="export-to-sheets-btn" class="btn btn-primary" style="width: fit-content; background-color: var(--green); border-color: #059669;">
-                    <i class="fa-solid fa-file-export"></i> เริ่มส่งข้อมูลจาก Firebase สู่ Google Sheets
-                </button>
-                <div id="export-status" style="margin-top: 1rem; display: none; padding: 1rem; border-radius: 8px; background: #f3f4f6; border: 1px solid #e5e7eb;">
-                    <div id="export-progress-text" style="font-weight: 500; margin-bottom: 0.5rem; color: var(--dark-text);">กำลังประมวลผล...</div>
-                    <div style="width: 100%; background: #e5e7eb; border-radius: 4px; overflow: hidden; height: 10px;">
-                        <div id="export-progress-bar" style="width: 0%; height: 100%; background: var(--green); transition: width 0.3s;"></div>
                     </div>
                 </div>
             </div>
@@ -932,8 +866,7 @@
                     <!-- A4 Template will be rendered here by JS -->
                 </div>
             </div>
-            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <button id="preview-edit-btn" class="btn btn-primary" style="background-color: #f59e0b; border-color: #d97706;"><i class="fa-solid fa-pen-to-square"></i> แก้ไขเอกสารนี้</button>
+            <div class="modal-footer">
                 <button id="download-pdf-btn" class="btn btn-primary"><i class="fa-solid fa-file-pdf"></i> ดาวน์โหลด PDF</button>
             </div>
         </div>
@@ -1041,31 +974,19 @@
 
         // --- Google Apps Script Caller (Fallback & Migration) ---
         async function callGasApi(url, options = {}, retries = 2, delay = 1500) {
-            const fetchOptions = {
-                ...options,
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8',
-                    ...(options.headers || {})
-                }
-            };
             for (let attempt = 0; attempt <= retries; attempt++) {
                 try {
-                    const response = await originalFetch(url, fetchOptions);
+                    const response = await originalFetch(url, options);
                     const text = await response.text();
                     const trimmed = text.trim();
 
                     if (trimmed.startsWith('<') || trimmed.includes('<!DOCTYPE') || trimmed.includes('<html')) {
-                        let errMsg = "เซิร์ฟเวอร์ Google Apps Script ไม่พร้อมใช้งานชั่วคราว หรือคืนค่าหน้าเว็บ HTML";
-                        const bodyMatch = trimmed.match(/<div style="[^"]*font-family:monospace[^"]*">([\s\S]*?)<\/div>/i);
-                        if (bodyMatch && bodyMatch[1]) {
-                            errMsg = bodyMatch[1].trim();
-                        }
                         if (attempt < retries) {
-                            console.warn(`[callGasApi] ${errMsg} (กำลังลองใหม่ ครั้งที่ ${attempt + 1}/${retries})...`);
+                            console.warn(`[callGasApi] ได้รับหน้าเว็บ HTML แทน JSON (กำลังลองใหม่ ครั้งที่ ${attempt + 1}/${retries})...`);
                             await new Promise(r => setTimeout(r, delay));
                             continue;
                         }
-                        throw new Error(errMsg);
+                        throw new Error("เซิร์ฟเวอร์ Google Apps Script ไม่พร้อมใช้งานชั่วคราว");
                     }
 
                     if (!response.ok) {
@@ -1280,64 +1201,7 @@
                     };
                     if (data.name) updateObj.name = data.name;
                     await approverRef.update(updateObj);
-
-                    // อัปโหลดเข้า Google Drive ผ่าน Apps Script ในพื้นหลังเพื่อเก็บ URL ถาวร ป้องกันขนาด Base64 ล้น
-                    if (data.signatureBase64 && String(data.signatureBase64).startsWith('data:image/')) {
-                        callGasApi(API_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({ action: 'saveApproverSignature', data })
-                        }, 1).then(gasRes => {
-                            if (gasRes && gasRes.signatureUrl && String(gasRes.signatureUrl).startsWith('http')) {
-                                approverRef.update({ signatureUrl: gasRes.signatureUrl }).catch(() => {});
-                            }
-                        }).catch(() => {});
-                    }
-
                     return { success: true, signatureUrl: data.signatureBase64 };
-                }
-
-                case 'saveApprover': {
-                    const data = (postData && postData.data) ? postData.data : (postData || {});
-                    const cleanEmail = (data.email || '').trim().toLowerCase();
-                    if (!cleanEmail) return { success: false, message: 'อีเมลไม่ถูกต้อง' };
-                    
-                    const approverRef = db.ref(`Approvers/${encodeKey(cleanEmail)}`);
-                    const updateObj = {
-                        email: cleanEmail,
-                        name: data.name ? String(data.name).trim() : ''
-                    };
-                    if (data.signatureUrl !== undefined) {
-                        updateObj.signatureUrl = data.signatureUrl;
-                    }
-                    await approverRef.update(updateObj);
-
-                    // Sync ไปยัง Google Apps Script (ชีต Approvers) ถ้าเชื่อมต่อไว้
-                    try {
-                        callGasApi(API_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({ action: 'saveApprover', data: updateObj })
-                        }, 1).catch(() => {});
-                    } catch (e) {}
-
-                    return { success: true, message: 'บันทึกข้อมูลผู้อนุมัติเรียบร้อยแล้ว', data: updateObj };
-                }
-
-                case 'deleteApprover': {
-                    const data = (postData && postData.data) ? postData.data : (postData || {});
-                    const cleanEmail = (data.email || '').trim().toLowerCase();
-                    if (!cleanEmail) return { success: false, message: 'อีเมลไม่ถูกต้อง' };
-
-                    await db.ref(`Approvers/${encodeKey(cleanEmail)}`).remove();
-
-                    // Sync ไปยัง Google Apps Script (ชีต Approvers) ถ้าเชื่อมต่อไว้
-                    try {
-                        callGasApi(API_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({ action: 'deleteApprover', data: { email: cleanEmail } })
-                        }, 1).catch(() => {});
-                    } catch (e) {}
-
-                    return { success: true, message: 'ลบผู้อนุมัติเรียบร้อยแล้ว' };
                 }
 
                 case 'getAllUsers': {
@@ -1357,24 +1221,10 @@
                 case 'saveUserSignature': {
                     const data = (postData && postData.data) ? postData.data : (postData || {});
                     const userIdentifier = data.userIdentifier;
-                    const userRef = db.ref(`Users/${encodeKey(userIdentifier)}`);
-                    await userRef.set({
+                    await db.ref(`Users/${encodeKey(userIdentifier)}`).set({
                         userIdentifier: userIdentifier,
                         signatureUrl: data.signatureBase64
                     });
-
-                    // อัปโหลดเข้า Google Drive ผ่าน Apps Script ในพื้นหลังเพื่อเก็บ URL ถาวร ป้องกันขนาด Base64 ล้น
-                    if (data.signatureBase64 && String(data.signatureBase64).startsWith('data:image/')) {
-                        callGasApi(API_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({ action: 'saveUserSignature', data })
-                        }, 1).then(gasRes => {
-                            if (gasRes && gasRes.signatureUrl && String(gasRes.signatureUrl).startsWith('http')) {
-                                userRef.update({ signatureUrl: gasRes.signatureUrl }).catch(() => {});
-                            }
-                        }).catch(() => {});
-                    }
-
                     return { success: true, signatureUrl: data.signatureBase64 };
                 }
 
@@ -1472,13 +1322,6 @@
             const editSearchInput = document.getElementById('edit-search-input');
             const editReturnedTableBody = document.getElementById('edit-returned-table-body');
             const editPendingTableBody = document.getElementById('edit-pending-table-body');
-            const editApprovedTableBody = document.getElementById('edit-approved-table-body');
-            const previewEditBtn = document.getElementById('preview-edit-btn');
-
-            // Settings Page Approvers Elements
-            const approversTableBody = document.getElementById('approvers-table-body');
-            const addApproverBtn = document.getElementById('add-approver-btn');
-            let currentSettingsApprovers = [];
 
             // --- Lazy Initialized Variables ---
             let signaturePad; 
@@ -1969,11 +1812,15 @@
                     }
                 }
 
-                // ส่วนคำนวณยอดรวม ใช้ data.items ทั้งหมดเสมอเพื่อให้ยอดเป๊ะ
+                // ส่วนคำนวณยอดรวม ใช้ data.items ทั้งหมดเสมอเพื่อให้ยอดเป๊ะ และคำนวณจากสูตรเดียวกับหน้าสร้างใบเสนอราคา (ป้องกันปัญหาการปัดเศษสะสมทีละรายการ)
                 const subtotal = (data.items || []).reduce((acc, item) => acc + (parseFloat(item.quantity || 0) * parseFloat(item.unitPrice || 0)), 0);
                 const netTotal = (data.items || []).reduce((acc, item) => {
-                    const netStr = item.netPrice ? item.netPrice.toString() : '0';
-                    return acc + (parseFloat(netStr.replace(/[^0-9.-]+/g, "")) || 0);
+                    const qty = parseFloat(item.quantity || 0);
+                    const price = parseFloat(item.unitPrice || 0);
+                    const discount = parseFloat(item.discount || 0);
+                    const totalBeforeDiscount = qty * price;
+                    const discountAmount = totalBeforeDiscount * (discount / 100);
+                    return acc + (totalBeforeDiscount - discountAmount);
                 }, 0);
                 const totalDiscount = subtotal - netTotal;
                 const vatAmount = netTotal * 0.07;
@@ -2384,7 +2231,7 @@
                     updateAllBadges(allDocuments);
                     
                     allDocumentsForEdit = allDocuments
-                        .filter(doc => doc.status === 'pending' || doc.status === 'returned' || doc.status === 'approved')
+                        .filter(doc => doc.status === 'pending' || doc.status === 'returned')
                         .sort((a, b) => new Date(b.date) - new Date(a.date));
                     
                     displayEditTables(allDocumentsForEdit);
@@ -2398,11 +2245,9 @@
             function displayEditTables(docs) {
                 const returnedDocs = docs.filter(doc => doc.status === 'returned');
                 const pendingDocs = docs.filter(doc => doc.status === 'pending');
-                const approvedDocs = docs.filter(doc => doc.status === 'approved');
 
                 populateReturnedTable(returnedDocs);
                 populatePendingTable(pendingDocs);
-                populateApprovedTable(approvedDocs);
             }
             
             function populateReturnedTable(docs) {
@@ -2443,27 +2288,6 @@
                         <td><button class="btn btn-primary edit-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-pen"></i> แก้ไข</button></td>
                     `;
                     editPendingTableBody.appendChild(row);
-                });
-            }
-
-            function populateApprovedTable(docs) {
-                if (!editApprovedTableBody) return;
-                editApprovedTableBody.innerHTML = '';
-                if (docs.length === 0) {
-                    editApprovedTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">ไม่พบรายการที่อนุมัติแล้ว</td></tr>';
-                    return;
-                }
-                docs.forEach(doc => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${escapeHTML(formatDate(doc.date))}</td>
-                        <td>${escapeHTML(doc.docNumber)}</td>
-                        <td>${escapeHTML(doc.requester)}</td>
-                        <td>${escapeHTML(doc.approverName || '-')}</td>
-                        <td><span class="status-badge status-approved">${getStatusText(doc.status)}</span></td>
-                        <td><button class="btn btn-primary edit-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-pen"></i> แก้ไข</button></td>
-                    `;
-                    editApprovedTableBody.appendChild(row);
                 });
             }
             
@@ -2615,9 +2439,7 @@
                         <td>${escapeHTML(doc.contactName || '')}</td> 
                         <td>${escapeHTML(doc.companyName || '')}</td> 
                         <td><span class="status-badge ${statusClass}">${getStatusText(doc.status)}</span></td>
-                        <td>
-                            <button class="btn btn-secondary preview-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-eye"></i> พรีวิว</button>
-                        </td>
+                        <td><button class="btn btn-secondary preview-btn" data-doc-number="${escapeHTML(doc.docNumber)}"><i class="fa-solid fa-eye"></i> พรีวิว</button></td>
                     `;
                     documentsTableBody.appendChild(row);
                 });
@@ -2633,8 +2455,7 @@
                     try {
                         const docNumber = doc.docNumber ? String(doc.docNumber).toLowerCase() : '';
                         const requester = doc.requester ? String(doc.requester).toLowerCase() : '';
-                        const companyName = doc.companyName ? String(doc.companyName).toLowerCase() : '';
-                        return docNumber.includes(searchTerm) || requester.includes(searchTerm) || companyName.includes(searchTerm);
+                        return docNumber.includes(searchTerm) || requester.includes(searchTerm);
                     } catch (err) {
                         console.error("Error filtering document for edit:", doc, err);
                         return false;
@@ -2908,7 +2729,6 @@
                 }
                 else if (targetId === 'documents') await loadDocumentsPageData();
                 else if (targetId === 'edit') await loadEditPageData();
-                else if (targetId === 'settings') await loadSettingsApprovers();
             }
             
             // --- Create/Edit Quotation Page Logic ---
@@ -2935,93 +2755,9 @@
                 editingDocNumber = null;
                 currentEditDocDate = null; // รีเซ็ตเมื่อเคลียร์ฟอร์ม
                 
-                const approverNameInput = document.getElementById('approver-name');
-                if (approverNameInput) {
-                    approverNameInput.readOnly = false;
-                    approverNameInput.style.backgroundColor = '';
-                    approverNameInput.removeAttribute('title');
-                }
-
                 const submitBtn = document.getElementById('submit-quotation-btn');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ขออนุมัติ';
-            }
-
-            async function requestEditDocument(docNumber) {
-                if (!docNumber || !String(docNumber).trim()) {
-                    Swal.fire('ไม่พบเลขที่เอกสาร', 'กรุณาระบุเลขที่เอกสารที่ถูกต้อง', 'warning');
-                    return;
-                }
-
-                const cleanDocNum = String(docNumber).replace(/'/g, '').trim();
-                let doc = (allDocuments || []).find(d => String(d.docNumber).replace(/'/g, '').trim() === cleanDocNum);
-                let requester = doc ? (doc.requester || '') : '';
-                let status = doc ? doc.status : '';
-
-                if (!requester) {
-                    try {
-                        Swal.fire({
-                            title: 'กำลังตรวจสอบข้อมูลเอกสาร...',
-                            allowOutsideClick: false,
-                            didOpen: () => Swal.showLoading()
-                        });
-                        const result = await callApi(`${API_URL}?action=getQuotationDetails&docNumber=${cleanDocNum}`);
-                        if (result && result.success && result.data) {
-                            requester = result.data.requester || '';
-                            status = result.data.status || '';
-                        }
-                        Swal.close();
-                    } catch (err) {
-                        console.error('Error fetching doc details:', err);
-                        Swal.close();
-                    }
-                }
-
-                let warningNotice = '';
-                if (status === 'approved') {
-                    warningNotice = `
-                        <div style="margin-top: 12px; padding: 10px 12px; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; color: #b45309; font-size: 0.88rem; text-align: left; line-height: 1.4;">
-                            <i class="fa-solid fa-triangle-exclamation" style="color: #d97706;"></i> <strong>แจ้งเตือน:</strong> เอกสารนี้ได้รับการอนุมัติแล้ว หากแก้ไขและกดบันทึก สถานะจะถูกเปลี่ยนกลับเป็น <strong>"รออนุมัติ"</strong> เพื่อให้ผู้อนุมัติตรวจสอบและลงนามใหม่อีกครั้ง
-                        </div>
-                    `;
-                }
-
-                const lastVerifiedName = sessionStorage.getItem('lastCreatorName') || '';
-
-                const { value: inputName, isConfirmed } = await Swal.fire({
-                    title: 'ยืนยันตัวตนผู้สร้างเอกสาร',
-                    html: `
-                        <p style="color: #4b5563; font-size: 0.95rem; margin-bottom: 6px;">
-                            กรุณากรอกชื่อ-นามสกุลของผู้สร้างเอกสาร <strong>${escapeHTML(cleanDocNum)}</strong> เพื่อยืนยันสิทธิ์ในการแก้ไข
-                        </p>
-                        ${warningNotice}
-                    `,
-                    input: 'text',
-                    inputValue: lastVerifiedName,
-                    inputPlaceholder: 'พิมพ์ชื่อ-นามสกุล ผู้ขออนุมัติ...',
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-solid fa-check"></i> ยืนยันเพื่อแก้ไข',
-                    cancelButtonText: 'ยกเลิก',
-                    confirmButtonColor: '#2563eb',
-                    cancelButtonColor: '#6b7280',
-                    allowOutsideClick: false,
-                    inputValidator: (value) => {
-                        if (!value || !value.trim()) {
-                            return 'กรุณากรอกชื่อ-นามสกุล ผู้สร้างเอกสาร!';
-                        }
-                        const cleanInput = value.trim().replace(/\s+/g, '').toLowerCase();
-                        const cleanReq = (requester || '').trim().replace(/\s+/g, '').toLowerCase();
-                        if (cleanReq && cleanInput !== cleanReq) {
-                            return 'ชื่อไม่ตรงกับผู้สร้างเอกสารนี้! เฉพาะผู้สร้างเอกสารเท่านั้นที่สามารถแก้ไขได้';
-                        }
-                    }
-                });
-
-                if (isConfirmed && inputName) {
-                    sessionStorage.setItem('lastCreatorName', inputName.trim());
-                    if (previewModal) previewModal.style.display = 'none';
-                    await populateFormForEdit(cleanDocNum);
-                }
             }
 
             async function populateFormForEdit(docNumber) {
@@ -3051,14 +2787,7 @@
                     document.getElementById('technician').value = data.technician || '';
                     document.getElementById('proposer-phone').value = data.proposerPhone ? data.proposerPhone.toString().replace(/'/g, '') : '';
                     document.getElementById('remarks').value = data.remarks || '';
-                    
-                    const approverNameInput = document.getElementById('approver-name');
-                    if (approverNameInput) {
-                        approverNameInput.value = data.requester || '';
-                        approverNameInput.readOnly = true;
-                        approverNameInput.style.backgroundColor = '#f3f4f6';
-                        approverNameInput.title = 'ไม่สามารถแก้ไขชื่อผู้ขออนุมัติในโหมดแก้ไขเอกสารได้';
-                    }
+                    document.getElementById('approver-name').value = data.requester || '';
 
                     // เก็บวันที่ของเอกสารเดิมไว้เป็นฐานในการคำนวณ
                     currentEditDocDate = data.date; 
@@ -3487,17 +3216,9 @@
             editPage.addEventListener('click', e => {
                 if (e.target.closest('.edit-btn')) {
                     const docNumber = e.target.closest('.edit-btn').dataset.docNumber;
-                    requestEditDocument(docNumber);
+                    populateFormForEdit(docNumber);
                 }
             });
-
-            if (previewEditBtn) {
-                previewEditBtn.addEventListener('click', () => {
-                    if (currentPreviewData && currentPreviewData.docNumber) {
-                        requestEditDocument(currentPreviewData.docNumber);
-                    }
-                });
-            }
 
             document.getElementById('doc-search-input').addEventListener('input', (e) => {
                 const searchTerm = e.target.value.trim().toLowerCase();
@@ -3815,496 +3536,6 @@
                     console.error("Migration error:", err);
                     Swal.fire('การโอนย้ายข้อมูลไม่สมบูรณ์', `เกิดข้อผิดพลาด: ${err.message}`, 'error');
                     if (progressText) progressText.textContent = `เกิดข้อผิดพลาด: ${err.message}`;
-                }
-            }
-
-            // --- Export Firebase Data to Google Sheets ---
-            const exportToSheetsBtn = document.getElementById('export-to-sheets-btn');
-            if (exportToSheetsBtn) {
-                exportToSheetsBtn.addEventListener('click', exportDataToGoogleSheets);
-            }
-
-            async function exportDataToGoogleSheets() {
-                if (!db) {
-                    Swal.fire('ข้อผิดพลาด', 'Firebase ยังไม่ได้ถูกเริ่มต้น', 'error');
-                    return;
-                }
-
-                const { value: selectedMode, isConfirmed } = await Swal.fire({
-                    title: 'ส่งข้อมูลสู่ Google Sheets',
-                    html: `
-                        <div style="text-align: left; font-size: 0.95rem;">
-                            <p style="color: #4b5563; margin-bottom: 12px;">
-                                ระบบจะส่งข้อมูลใบเสนอราคา, รายการสินค้า, ผู้มีสิทธิ์อนุมัติ และลายเซ็นทั้งหมดจาก Firebase กลับไปยัง Google Sheets เพื่อให้ข้อมูลตรงกัน
-                            </p>
-                            <label style="display: block; font-weight: 600; margin-bottom: 8px;">เลือกรูปแบบการซิงค์ข้อมูล:</label>
-                            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <label style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; cursor: pointer;">
-                                    <input type="radio" name="sync-mode-radio" value="upsert" checked style="margin-top: 3px;">
-                                    <div>
-                                        <strong style="color: #111827;">1. ซิงค์อัปเดต (Upsert - แนะนำ)</strong>
-                                        <div style="font-size: 0.85rem; color: #6b7280;">ปรับปรุงรายการเดิมที่มีการแก้ไข และเพิ่มรายการใหม่ลงชีต (ปลอดภัย ไม่ลบข้อมูลเดิม)</div>
-                                    </div>
-                                </label>
-                                <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
-                                    <input type="radio" name="sync-mode-radio" value="overwrite" style="margin-top: 3px;">
-                                    <div>
-                                        <strong style="color: #dc2626;">2. เขียนทับทั้งหมด (Overwrite / Full Mirror)</strong>
-                                        <div style="font-size: 0.85rem; color: #6b7280;">ล้างแถวข้อมูลเดิมในชีตทั้งหมด แล้วใส่ข้อมูลจาก Firebase ใหม่ 100% ตรงตามปัจจุบัน</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    `,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#059669',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: '<i class="fa-solid fa-file-export"></i> เริ่มส่งข้อมูลสู่ Google Sheets',
-                    cancelButtonText: 'ยกเลิก',
-                    preConfirm: () => {
-                        const checked = document.querySelector('input[name="sync-mode-radio"]:checked');
-                        return checked ? checked.value : 'upsert';
-                    }
-                });
-
-                if (!isConfirmed || !selectedMode) return;
-
-                const exportStatus = document.getElementById('export-status');
-                const progressText = document.getElementById('export-progress-text');
-                const progressBar = document.getElementById('export-progress-bar');
-                if (exportStatus) exportStatus.style.display = 'block';
-
-                function setExportProgress(pct, msg) {
-                    if (progressText) progressText.textContent = msg;
-                    if (progressBar) progressBar.style.width = `${pct}%`;
-                }
-
-                // Helper ป้องกัน Base64 ยาวเกิน 40,000 ตัวอักษรทำให้ Google Sheets cell limit (50,000) ล่ม
-                // และแปลงเป็น Google Drive Link จาก allUsersSignatures หากมี
-                function sanitizeSigForExport(sigVal, userKey) {
-                    if (!sigVal) return '';
-                    const s = String(sigVal).trim();
-                    if (s.startsWith('http://') || s.startsWith('https://')) return s;
-                    if (userKey && typeof allUsersSignatures === 'object' && allUsersSignatures[userKey]) {
-                        const cached = String(allUsersSignatures[userKey]).trim();
-                        if (cached.startsWith('http')) return cached;
-                    }
-                    if (s.startsWith('data:image/') || s.length > 40000) {
-                        return '';
-                    }
-                    return s;
-                }
-
-                try {
-                    setExportProgress(10, 'กำลังอ่านข้อมูลผู้อนุมัติจาก Firebase...');
-                    const approversSnap = await db.ref('Approvers').once('value');
-                    const approversList = Object.values(approversSnap.val() || {});
-                    const sanitizedApprovers = approversList.map(a => ({
-                        ...a,
-                        signatureUrl: sanitizeSigForExport(a.signatureUrl, a.email || a.name)
-                    }));
-
-                    setExportProgress(20, `กำลังส่งข้อมูลผู้อนุมัติ (${sanitizedApprovers.length} ท่าน) สู่ Google Sheets...`);
-                    const apprSyncRes = await callGasApi(`${API_URL}?action=syncFromFirebase`, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'syncFromFirebase',
-                            data: {
-                                type: 'approvers',
-                                mode: selectedMode,
-                                data: sanitizedApprovers
-                            }
-                        })
-                    }, 2);
-                    if (!apprSyncRes || !apprSyncRes.success) {
-                        throw new Error(apprSyncRes ? apprSyncRes.message : 'ไม่สามารถส่งข้อมูลผู้อนุมัติได้');
-                    }
-
-                    setExportProgress(35, 'กำลังอ่านข้อมูลลายเซ็นผู้ใช้จาก Firebase...');
-                    const usersSnap = await db.ref('Users').once('value');
-                    const usersList = Object.values(usersSnap.val() || {});
-                    const sanitizedUsers = usersList.map(u => ({
-                        ...u,
-                        signatureUrl: sanitizeSigForExport(u.signatureUrl, u.userIdentifier)
-                    }));
-
-                    setExportProgress(45, `กำลังส่งข้อมูลลายเซ็นผู้ใช้ (${sanitizedUsers.length} รายการ) สู่ Google Sheets...`);
-                    const usersSyncRes = await callGasApi(`${API_URL}?action=syncFromFirebase`, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'syncFromFirebase',
-                            data: {
-                                type: 'users',
-                                mode: selectedMode,
-                                data: sanitizedUsers
-                            }
-                        })
-                    }, 2);
-                    if (!usersSyncRes || !usersSyncRes.success) {
-                        throw new Error(usersSyncRes ? usersSyncRes.message : 'ไม่สามารถส่งข้อมูลลายเซ็นผู้ใช้ได้');
-                    }
-
-                    setExportProgress(55, 'กำลังอ่านข้อมูลใบเสนอราคาทั้งหมดจาก Firebase...');
-                    const docsSnap = await db.ref('Documents').once('value');
-                    const docsObj = docsSnap.val() || {};
-                    const allDocs = Object.values(docsObj);
-                    const totalDocs = allDocs.length;
-
-                    setExportProgress(65, `พบเอกสารทั้งหมด ${totalDocs} รายการ กำลังเตรียมส่งสู่ Google Sheets...`);
-
-                    const chunkSize = 50; // ส่งทีละ 50 รายการเพื่อความเสถียร
-                    for (let i = 0; i < totalDocs; i += chunkSize) {
-                        const rawChunk = allDocs.slice(i, i + chunkSize);
-                        const chunk = rawChunk.map(doc => ({
-                            ...doc,
-                            signatureUrl: sanitizeSigForExport(doc.signatureUrl, doc.requester),
-                            approverSignatureUrl: sanitizeSigForExport(doc.approverSignatureUrl, doc.approverName)
-                        }));
-                        const isFirstChunk = (i === 0);
-                        const currentCount = Math.min(i + chunkSize, totalDocs);
-                        const pct = 65 + Math.round((currentCount / totalDocs) * 30);
-
-                        setExportProgress(pct, `กำลังส่งเอกสารใบเสนอราคา (${currentCount}/${totalDocs} รายการ) สู่ Google Sheets...`);
-
-                        const chunkRes = await callGasApi(`${API_URL}?action=syncFromFirebase`, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                action: 'syncFromFirebase',
-                                data: {
-                                    type: 'documents',
-                                    mode: selectedMode,
-                                    isFirstChunk: isFirstChunk,
-                                    data: chunk
-                                }
-                            })
-                        }, 2);
-
-                        if (!chunkRes || !chunkRes.success) {
-                            throw new Error(chunkRes ? chunkRes.message : `เกิดข้อผิดพลาดในการส่งชุดข้อมูลที่ ${i + 1} - ${currentCount}`);
-                        }
-                    }
-
-                    setExportProgress(100, `ส่งข้อมูลสู่ Google Sheets สำเร็จทั้งหมด ${totalDocs} รายการ เรียบร้อยแล้ว!`);
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ส่งข้อมูลสำเร็จ!',
-                        html: `
-                            ระบบได้ส่งข้อมูลทั้งหมดจาก Firebase สู่ Google Sheets เรียบร้อยแล้ว:<br>
-                            - ใบเสนอราคา: <strong>${totalDocs}</strong> รายการ<br>
-                            - ผู้มีสิทธิ์อนุมัติ: <strong>${approversList.length}</strong> ท่าน<br>
-                            - ลายเซ็นผู้ใช้งาน: <strong>${usersList.length}</strong> รายการ<br>
-                            <br><small style="color: #6b7280;">ข้อมูลใน Google Sheets เป็นปัจจุบันตรงกับ Firebase แล้ว</small>
-                        `
-                    });
-                } catch (err) {
-                    console.error("Export to Sheets error:", err);
-                    Swal.fire('การส่งข้อมูลไม่สมบูรณ์', `เกิดข้อผิดพลาด: ${err.message}`, 'error');
-                    if (progressText) progressText.textContent = `เกิดข้อผิดพลาด: ${err.message}`;
-                }
-            }
-
-            // --- Settings Page: Approvers Management ---
-            if (addApproverBtn) {
-                addApproverBtn.addEventListener('click', showAddApproverModal);
-            }
-
-            if (approversTableBody) {
-                approversTableBody.addEventListener('click', (e) => {
-                    const editBtn = e.target.closest('.edit-approver-btn');
-                    if (editBtn) {
-                        const email = editBtn.dataset.email;
-                        showEditApproverModal(email);
-                        return;
-                    }
-
-                    const deleteBtn = e.target.closest('.delete-approver-btn');
-                    if (deleteBtn) {
-                        const email = deleteBtn.dataset.email;
-                        handleDeleteApprover(email);
-                        return;
-                    }
-                });
-            }
-
-            async function loadSettingsApprovers() {
-                if (!approversTableBody) return;
-                approversTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 1.5rem;"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดรายชื่อผู้มีสิทธิ์อนุมัติ...</td></tr>';
-                try {
-                    const result = await callApi(`${API_URL}?action=getApprovers`);
-                    if (result && result.success) {
-                        currentSettingsApprovers = (result.data || []).sort((a, b) => (a.email || '').localeCompare(b.email || ''));
-                        renderSettingsApproversTable(currentSettingsApprovers);
-
-                        // ซิงค์ข้อมูลเข้าตัวแปรส่วนกลาง
-                        approverMapping = {};
-                        approverEmails = [];
-                        currentSettingsApprovers.forEach(appr => {
-                            if (appr.email) {
-                                const cleanEmail = appr.email.trim().toLowerCase();
-                                const cleanName = appr.name ? String(appr.name).trim() : '';
-                                approverEmails.push(cleanEmail);
-                                if (cleanName) approverMapping[cleanEmail] = cleanName;
-                                if (appr.signatureUrl) {
-                                    allUsersSignatures[cleanEmail] = appr.signatureUrl;
-                                    if (cleanName) allUsersSignatures[cleanName] = appr.signatureUrl;
-                                }
-                            }
-                        });
-                    } else {
-                        throw new Error(result ? result.message : 'ไม่สามารถดึงข้อมูลผู้อนุมัติได้');
-                    }
-                } catch (err) {
-                    console.error("Error loading settings approvers:", err);
-                    approversTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--red); padding: 1.5rem;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${escapeHTML(err.message)}</td></tr>`;
-                }
-            }
-
-            function renderSettingsApproversTable(approvers) {
-                if (!approversTableBody) return;
-                approversTableBody.innerHTML = '';
-                if (!approvers || approvers.length === 0) {
-                    approversTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 1.5rem; color: #6b7280;">ยังไม่มีผู้มีสิทธิ์อนุมัติในระบบ กรุณากดปุ่ม "+ เพิ่มผู้มีสิทธิ์อนุมัติ"</td></tr>';
-                    return;
-                }
-
-                approvers.forEach((appr, index) => {
-                    const row = document.createElement('tr');
-                    const sigHtml = appr.signatureUrl 
-                        ? `<img src="${escapeHTML(appr.signatureUrl)}" alt="Signature" style="height: 35px; max-width: 120px; object-fit: contain; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px;">`
-                        : `<span style="color: #9ca3af; font-size: 0.85rem;">ยังไม่มีลายเซ็น</span>`;
-
-                    row.innerHTML = `
-                        <td style="text-align: center; font-weight: 500;">${index + 1}</td>
-                        <td><strong>${escapeHTML(appr.email)}</strong></td>
-                        <td>${escapeHTML(appr.name || '-')}</td>
-                        <td style="text-align: center;">${sigHtml}</td>
-                        <td style="text-align: center;">
-                            <div style="display: flex; gap: 6px; justify-content: center;">
-                                <button class="btn btn-secondary edit-approver-btn" data-email="${escapeHTML(appr.email)}" title="แก้ไขข้อมูล"><i class="fa-solid fa-pen"></i> แก้ไข</button>
-                                <button class="btn btn-reject delete-approver-btn" data-email="${escapeHTML(appr.email)}" title="ลบสิทธิ์"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </td>
-                    `;
-                    approversTableBody.appendChild(row);
-                });
-            }
-
-            async function showAddApproverModal() {
-                const { value: formValues } = await Swal.fire({
-                    title: 'เพิ่มผู้มีสิทธิ์อนุมัติ',
-                    html: `
-                        <div style="text-align: left; font-size: 0.95rem;">
-                            <div style="margin-bottom: 14px;">
-                                <label style="display: block; font-weight: 600; margin-bottom: 4px; color: #374151;">อีเมล (Google Account) <span style="color: red;">*</span></label>
-                                <input type="email" id="new-approver-email" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box;" placeholder="user@gmail.com">
-                            </div>
-                            <div style="margin-bottom: 14px;">
-                                <label style="display: block; font-weight: 600; margin-bottom: 4px; color: #374151;">ชื่อ-นามสกุล ผู้อนุมัติ <span style="color: red;">*</span></label>
-                                <input type="text" id="new-approver-name" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box;" placeholder="เช่น นายสมชาย ใจดี">
-                            </div>
-                            <div style="font-size: 0.85rem; color: #6b7280; background: #f3f4f6; padding: 10px 12px; border-radius: 6px; line-height: 1.4;">
-                                <i class="fa-solid fa-circle-info" style="color: var(--primary-blue);"></i> <strong>หมายเหตุ:</strong> ลายเซ็นของผู้อนุมัติสามารถวาดหรืออัปโหลดตอนเข้าสู่ระบบเพื่ออนุมัติใบเสนอราคา ระบบจะบันทึกให้อัตโนมัติ
-                            </div>
-                        </div>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-solid fa-save"></i> บันทึกข้อมูล',
-                    cancelButtonText: 'ยกเลิก',
-                    confirmButtonColor: '#2563eb',
-                    cancelButtonColor: '#6b7280',
-                    focusConfirm: false,
-                    preConfirm: () => {
-                        const emailInput = document.getElementById('new-approver-email');
-                        const nameInput = document.getElementById('new-approver-name');
-                        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
-                        const name = nameInput ? nameInput.value.trim() : '';
-
-                        if (!email) {
-                            Swal.showValidationMessage('กรุณากรอกอีเมลผู้อนุมัติ');
-                            return false;
-                        }
-                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                            Swal.showValidationMessage('รูปแบบอีเมลไม่ถูกต้อง');
-                            return false;
-                        }
-                        if (!name) {
-                            Swal.showValidationMessage('กรุณากรอกชื่อ-นามสกุล ผู้อนุมัติ');
-                            return false;
-                        }
-
-                        const exists = (currentSettingsApprovers || []).some(a => (a.email || '').trim().toLowerCase() === email);
-                        if (exists) {
-                            Swal.showValidationMessage('อีเมลนี้มีอยู่ในระบบแล้ว');
-                            return false;
-                        }
-
-                        return { email, name };
-                    }
-                });
-
-                if (formValues) {
-                    Swal.fire({
-                        title: 'กำลังบันทึก...',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading()
-                    });
-                    try {
-                        const res = await callApi(API_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                action: 'saveApprover',
-                                data: {
-                                    email: formValues.email,
-                                    name: formValues.name,
-                                    signatureUrl: ''
-                                }
-                            })
-                        }, 1);
-
-                        if (!res.success) throw new Error(res.message);
-
-                        await loadSettingsApprovers();
-                        Swal.fire('สำเร็จ!', 'เพิ่มผู้มีสิทธิ์อนุมัติเรียบร้อยแล้ว', 'success');
-                    } catch (err) {
-                        Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถเพิ่มผู้อนุมัติได้: ${err.message}`, 'error');
-                    }
-                }
-            }
-
-            async function showEditApproverModal(email) {
-                const cleanEmail = (email || '').trim().toLowerCase();
-                const appr = (currentSettingsApprovers || []).find(a => (a.email || '').trim().toLowerCase() === cleanEmail);
-                if (!appr) return;
-
-                let sigPreviewHtml = '';
-                if (appr.signatureUrl) {
-                    sigPreviewHtml = `
-                        <div style="margin-top: 10px; margin-bottom: 12px;">
-                            <label style="display: block; font-weight: 600; margin-bottom: 4px; color: #374151;">ลายเซ็นปัจจุบัน:</label>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <img id="edit-sig-preview-img" src="${escapeHTML(appr.signatureUrl)}" style="height: 45px; max-width: 150px; object-fit: contain; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px;">
-                                <button type="button" id="remove-sig-btn" class="btn btn-reject" style="padding: 4px 10px; font-size: 0.85rem;"><i class="fa-solid fa-trash"></i> ลบลายเซ็น</button>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                let removeSig = false;
-
-                const { value: formValues } = await Swal.fire({
-                    title: 'แก้ไขข้อมูลผู้อนุมัติ',
-                    html: `
-                        <div style="text-align: left; font-size: 0.95rem;">
-                            <div style="margin-bottom: 14px;">
-                                <label style="display: block; font-weight: 600; margin-bottom: 4px; color: #374151;">อีเมล (Google Account)</label>
-                                <input type="email" id="edit-approver-email" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box; background: #f3f4f6;" value="${escapeHTML(appr.email)}" readonly>
-                            </div>
-                            <div style="margin-bottom: 14px;">
-                                <label style="display: block; font-weight: 600; margin-bottom: 4px; color: #374151;">ชื่อ-นามสกุล ผู้อนุมัติ <span style="color: red;">*</span></label>
-                                <input type="text" id="edit-approver-name" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box;" value="${escapeHTML(appr.name || '')}">
-                            </div>
-                            ${sigPreviewHtml}
-                        </div>
-                    `,
-                    didOpen: () => {
-                        const removeBtn = document.getElementById('remove-sig-btn');
-                        if (removeBtn) {
-                            removeBtn.addEventListener('click', () => {
-                                removeSig = true;
-                                const img = document.getElementById('edit-sig-preview-img');
-                                if (img) img.style.display = 'none';
-                                removeBtn.style.display = 'none';
-                            });
-                        }
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-solid fa-save"></i> บันทึกการแก้ไข',
-                    cancelButtonText: 'ยกเลิก',
-                    confirmButtonColor: '#2563eb',
-                    cancelButtonColor: '#6b7280',
-                    focusConfirm: false,
-                    preConfirm: () => {
-                        const nameInput = document.getElementById('edit-approver-name');
-                        const name = nameInput ? nameInput.value.trim() : '';
-
-                        if (!name) {
-                            Swal.showValidationMessage('กรุณากรอกชื่อ-นามสกุล ผู้อนุมัติ');
-                            return false;
-                        }
-
-                        return {
-                            email: cleanEmail,
-                            name,
-                            signatureUrl: removeSig ? '' : (appr.signatureUrl || '')
-                        };
-                    }
-                });
-
-                if (formValues) {
-                    Swal.fire({
-                        title: 'กำลังบันทึก...',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading()
-                    });
-                    try {
-                        const res = await callApi(API_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                action: 'saveApprover',
-                                data: formValues
-                            })
-                        }, 1);
-
-                        if (!res.success) throw new Error(res.message);
-
-                        await loadSettingsApprovers();
-                        Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลผู้อนุมัติเรียบร้อยแล้ว', 'success');
-                    } catch (err) {
-                        Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถบันทึกได้: ${err.message}`, 'error');
-                    }
-                }
-            }
-
-            async function handleDeleteApprover(email) {
-                const cleanEmail = (email || '').trim().toLowerCase();
-                const appr = (currentSettingsApprovers || []).find(a => (a.email || '').trim().toLowerCase() === cleanEmail);
-                const displayName = appr && appr.name ? `${appr.name} (${cleanEmail})` : cleanEmail;
-
-                const { isConfirmed } = await Swal.fire({
-                    title: 'ยืนยันการลบสิทธิ์ผู้อนุมัติ?',
-                    html: `คุณแน่ใจหรือไม่ว่าต้องการลบสิทธิ์การอนุมัติของ <strong>${escapeHTML(displayName)}</strong>?<br><br><small style="color: #6b7280;">เมื่อลบแล้ว อีเมลนี้จะไม่สามารถเข้าสู่ระบบเพื่ออนุมัติใบเสนอราคาได้</small>`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fa-solid fa-trash"></i> ยืนยันการลบ',
-                    cancelButtonText: 'ยกเลิก',
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#6b7280'
-                });
-
-                if (isConfirmed) {
-                    Swal.fire({
-                        title: 'กำลังลบ...',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading()
-                    });
-                    try {
-                        const res = await callApi(API_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                action: 'deleteApprover',
-                                data: { email: cleanEmail }
-                            })
-                        }, 1);
-
-                        if (!res.success) throw new Error(res.message);
-
-                        await loadSettingsApprovers();
-                        Swal.fire('สำเร็จ!', 'ลบสิทธิ์ผู้อนุมัติเรียบร้อยแล้ว', 'success');
-                    } catch (err) {
-                        Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถลบผู้อนุมัติได้: ${err.message}`, 'error');
-                    }
                 }
             }
 
